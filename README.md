@@ -14,8 +14,8 @@ Folders named 'test' are strictly for unit tests.
 A simple library configuration can contain the following:
 '''
 target:so
-cflags:-fPIC 
-ldflags:-ldl
+cflag:-fPIC 
+ldflag:-ldl
 '''
 
 If your project contains subdirectories that are required to be built in a particular order, list the subdir config item. If a directory exists that isn't referenced in a config, Cast will enter it an compile it anyway. 
