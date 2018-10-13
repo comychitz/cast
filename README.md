@@ -1,10 +1,5 @@
 # cast
-A simple and lightweight C/C++ build system. 
-
-Features of Cast:
-* out of source builds 
-* minimal user configuration
-* unit test support
+A simple and lightweight C/C++ build system with minimal user configuration. It supports unit testing and compiling with external dependencies.
 
 # project structure 
 With Cast, every directory under your 'src' folder is automatically compiled based on the cast.cfg. If no config exists, the default behavior is to compile a driver. Cast supports compiling executables and libraries (static and dynamic). 
