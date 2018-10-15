@@ -18,6 +18,7 @@ namespace Cast {
       const std::string &ldflags() const;
 
     private:
+      std::string dir;
       std::map<std::string, std::string> cfg_;
 
   };
