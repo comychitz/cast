@@ -3,7 +3,7 @@ namespace Cast {
 
   class Cast {
     public:
-      Cast(const std::string &cwd); 
+      explicit Cast(const std::string &cwd); 
 
       ~Cast();
 

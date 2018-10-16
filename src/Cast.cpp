@@ -6,6 +6,7 @@ static bool buildCwd(const Config &cfg, const std::string &dest) {
   std::vector<std::string> exts = {".cpp", ".c", ".cc"};
   std::vector<std::string> sources = Util::getFiles(".", exts);
   std::stringstream cmd, archiveCmd;
+  // TODO - make all strings into constants
   cmd << "g++ " << "-I. -I" << topInclude() << " " << cfg.cflags()
     << " -L" << topLib() << " " << cfg.ldflags(); 
   for(auto source = sources.begin(); source != sources.end(); ++source) {
@@ -51,8 +52,9 @@ int Cast::build(const std::string &dir) {
       build(*dir);
     }
     const std::string dest = ".build/";
-    Util::mkdirp(dest);
-    if(!buildCwd(cfg, dest) || !linkFiles(cfg, dest)) {
+    if (!Util::mkdirp(dest) ||
+        !buildCwd(cfg, dest) || 
+        !linkFiles(cfg, dest)) {
       ret = 1;
     }
   } else {
