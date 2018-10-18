@@ -1,3 +1,9 @@
+#ifndef _CONFIG_H_
+#define _CONFIG_H_
+
+#include <map>
+#include <vector>
+#include <string>
 
 namespace Cast {
 
@@ -5,7 +11,7 @@ namespace Cast {
     public:
       Config();
 
-      ~Config() = default;
+      ~Config();
 
       void read(const std::string &cfg);
 
@@ -19,6 +25,8 @@ namespace Cast {
 
     private:
       std::map<std::string, std::string> cfg_;
+      std::vector<std::string> subdirs_;
   };
 
 }
+#endif

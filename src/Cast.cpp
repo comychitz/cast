@@ -1,36 +1,10 @@
 #include "Cast.h"
+#include "Util.h"
+#include <vector>
+#include <iostream>
+#include <sstream>
 
 namespace Cast {
-
-static bool buildCwd(const Config &cfg, const std::string &dest) {
-  std::vector<std::string> exts = {".cpp", ".c", ".cc"};
-  std::vector<std::string> sources = Util::getFiles(".", exts);
-  std::stringstream cmd, archiveCmd;
-  // TODO - make all strings into constants
-  cmd << "g++ " << "-I. -I" << topInclude() << " " << cfg.cflags()
-    << " -L" << topLib() << " " << cfg.ldflags(); 
-  for(auto source = sources.begin(); source != sources.end(); ++source) {
-    cmd << " " << *source;
-  }
-  if(cfg.target == "a") {
-    cmd << " -c";
-    archiveCmd << "ar -q " << dest << dir << ".a *.o; rm -f *.o";
-  } else {
-    if(cfg.target == "so") {
-      cmd << " -shared";
-    }        
-    cmd << " -o " << dest << dir;
-    if(cfg.target == "so") {
-      cmd << ".so";
-    }
-  }
-  if(!Util::run(cmd.str()) || 
-     (!archiveCmd.str.empty() && !Util::run(archiveCmd.str()))) {
-    return 1;
-  }
-  // TODO need to run linker?
-  return 0;
-}
 
 Cast::Cast(const std::string &cwd) : top_(cwd) 
 { 
@@ -48,13 +22,13 @@ int Cast::build(const std::string &dir) {
     if(Util::exists("cast.cfg")) {
       cfg.read("cast.cfg");
     }
-    for(auto dir = cfg.subdirs.begin(); dir != cfg.subdirs.end(); ++dir) {
+    for(auto dir = cfg.subdirs().begin(); dir != cfg.subdirs().end(); ++dir) {
       build(*dir);
     }
     const std::string dest = ".build/";
     if (!Util::mkdirp(dest) ||
-        !buildCwd(cfg, dest) || 
-        !linkFiles(cfg, dest)) {
+        !buildCwd(cfg, dir, dest) || 
+        !linkFiles(cfg, dir, dest)) {
       ret = 1;
     }
   } else {
@@ -63,7 +37,41 @@ int Cast::build(const std::string &dir) {
   return ret;
 }
 
-bool Cast::linkFiles(const Config &cfg, const std::string &dest) {
+bool Cast::buildCwd(const Config &cfg, 
+                    const std::string &dir,
+                    const std::string &dest) {
+  std::vector<std::string> exts = {".cpp", ".c", ".cc"};
+  std::vector<std::string> sources = Util::getFiles(".", exts);
+  std::stringstream cmd, archiveCmd;
+  // TODO - make all strings into constants
+  cmd << "g++ " << "-I. -I" << topInclude() << " " << cfg.cflags()
+    << " -L" << topLib() << " " << cfg.ldflags(); 
+  for(auto source = sources.begin(); source != sources.end(); ++source) {
+    cmd << " " << *source;
+  }
+  if(cfg.target() == "a") {
+    cmd << " -c";
+    archiveCmd << "ar -q " << dest << dir << ".a *.o; rm -f *.o";
+  } else {
+    if(cfg.target() == "so") {
+      cmd << " -shared";
+    }        
+    cmd << " -o " << dest << dir;
+    if(cfg.target() == "so") {
+      cmd << ".so";
+    }
+  }
+  if(!Util::run(cmd.str()) || 
+     (!archiveCmd.str().empty() && !Util::run(archiveCmd.str()))) {
+    return 1;
+  }
+  // TODO need to run linker?
+  return 0;
+}
+
+bool Cast::linkFiles(const Config &cfg, 
+                     const std::string &dir,
+                     const std::string &dest) {
   bool ret = true;
   do {
     std::vector<std::string> hExts = {".hpp", ".h"};
@@ -73,7 +81,8 @@ bool Cast::linkFiles(const Config &cfg, const std::string &dest) {
       break;
     }
     if(cfg.target() == "exe") {
-      if(!Util::symlink(dest+cfg.dir, topBin())) {
+      std::vector<std::string> exes = {dest+dir};
+      if(!Util::symlink(exes, topBin())) {
         ret = false;
         break;
       }
