@@ -41,3 +41,8 @@ subdir:myExe
 | cflag | *string* | append to the list of cflags |
 | ldflag | *string* | append to the list of ldflags |
 
+
+# build cast
+```
+$ cd src && make
+```
