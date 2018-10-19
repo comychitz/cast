@@ -5,8 +5,6 @@
 namespace Cast {
 
   Config::Config() {
-    cfg_["target"] = "exe";
-    cfg_["cflags"] = "-std=c++11";
   }
 
   Config::~Config() { }
@@ -24,16 +22,20 @@ namespace Cast {
           if(key == "subdir") {
             subdirs_.push_back(value);
           } else {
-            if(cfg_.find(key) == cfg_.end()) {
-              cfg_[key] = value;
+            if(key == "ldflag" || key == "cflag") {
+              key += "s";
             }
-            else {
-              cfg_[key] += std::string(" ") + value;
+            cfg_[key] += value;
+            if(key != "target") {
+              cfg_[key] += std::string(" ");
             }
           }
         }
       }
       f.close();
+      if(cfg_.find("target") == cfg_.end()) {
+        cfg_["target"] = "exe";
+      }
     }
     else {
       std::cout << "ERR> Failed to open file: " << cfg << std::endl; 
@@ -49,10 +51,10 @@ namespace Cast {
   }
 
   const std::string &Config::cflags() const {
-    return cfg_.at("clflags");
+    return cfg_.at("cflags");
   }
 
   const std::string &Config::ldflags() const {
-    return cfg_.at("ldlflags");
+    return cfg_.at("ldflags");
   }
 }
