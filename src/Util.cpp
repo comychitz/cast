@@ -42,7 +42,7 @@ namespace Cast {
       return true;
     }
 
-    bool mkdirp(const std::string &dir) { //future todo, use system call
+    bool mkdirp(const std::string &dir) { 
       return run("mkdir -p " + dir);
     }
 
@@ -52,12 +52,26 @@ namespace Cast {
       std::vector<std::string> files;
       if((dir = opendir(path.c_str())) != NULL) {
         struct dirent *entry;
-         while((entry = readdir (dir)) != NULL) {
-
-           //
-           // TODO if it passes filter
-           //
-        
+         while((entry = readdir(dir)) != NULL) {
+           struct stat statbuf;
+           std::string fpath = path + "/" + entry->d_name;
+           if(stat(fpath.c_str(), &statbuf) != 0) {
+             continue;
+           }
+           if(S_ISREG(statbuf.st_mode)) {
+             if(filter.empty()) {
+              files.push_back(entry->d_name);
+             }
+             std::string file = entry->d_name;
+             size_t pos = file.rfind(".");
+             std::string ext = file.substr(pos);
+             for(auto f = filter.begin(); f != filter.end(); ++f) {
+               if(ext == *f) {
+                 files.push_back(entry->d_name);
+                 break;
+               }
+             }
+           }
          }
          closedir (dir);
       } 
