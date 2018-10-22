@@ -8,7 +8,8 @@ TEST_CASE("Util::exists", "[util]") {
 
 TEST_CASE("Util::getFiles", "[util]") {
 
-  REQUIRE(!system("rm -rf tmpWork") && mkdir("tmpWork", 0744) == 0);
+  REQUIRE(system("rm -rf tmpWork") == 0);
+  REQUIRE(mkdir("tmpWork", 0744) == 0);
 
   REQUIRE(!system("touch tmpWork/a.cpp tmpWork/b.cpp tmpWork/b.h tmpWork/c.hpp"));
   std::vector<std::string> filter;
