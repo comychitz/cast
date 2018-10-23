@@ -57,4 +57,9 @@ namespace Cast {
   const std::string &Config::ldflags() const {
     return cfg_.at("ldflags");
   }
+  
+  const std::string &Config::name() const {
+    return cfg_.at("name");
+    // TODO need to handle when key is not there!
+  }
 }
