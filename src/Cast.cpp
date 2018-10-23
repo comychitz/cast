@@ -56,7 +56,12 @@ bool Cast::buildCwd(const Config &cfg,
     if(cfg.target() == "so") {
       cmd << " -shared";
     }        
-    cmd << " -o " << dest << dir;
+    cmd << " -o " << dest;
+    if cfg.name().empty()) { 
+      cmd << dir;
+    } else {
+      cmd << cfg.name();
+    }
     if(cfg.target() == "so") {
       cmd << ".so";
     }
