@@ -22,6 +22,8 @@ namespace Cast {
       const std::string &cflags() const;
 
       const std::string &ldflags() const;
+    
+      const std::string &name() const;
 
     private:
       std::map<std::string, std::string> cfg_;
