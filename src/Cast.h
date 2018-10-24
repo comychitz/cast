@@ -13,14 +13,17 @@ namespace Cast {
 
       int build(const std::string &dir);   
 
+      inline
       std::string topInclude() const {
         return top_ + "/build/include";
       }
 
+      inline
       std::string topLib() const {
         return top_ + "/build/lib";
       }
 
+      inline
       std::string topBin() const {
         return top_ + "/build/bin";
       }

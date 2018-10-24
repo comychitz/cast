@@ -37,6 +37,15 @@ int Cast::build(const std::string &dir) {
   return ret;
 }
 
+int Cast::clean(const std::string &dir) {
+
+  //
+  // TODO
+  //
+
+  return 1;
+}
+
 bool Cast::buildCwd(const Config &cfg, 
                     const std::string &dir,
                     const std::string &dest) {
