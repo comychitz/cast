@@ -4,7 +4,11 @@
 
 namespace Cast {
 
-  Config::Config() {
+  Config::Config(const std::string &dir) {
+    cfg_["name"] = dir;
+    cfg_["target"] = "exe";
+    cfg_["cflags"] = "";
+    cfg_["ldflags"] = "";
   }
 
   Config::~Config() { }
@@ -25,17 +29,15 @@ namespace Cast {
             if(key == "ldflag" || key == "cflag") {
               key += "s";
             }
-            cfg_[key] += value;
-            if(key != "target") {
-              cfg_[key] += std::string(" ");
+            if(key != "target" && key != "name") {
+              cfg_[key] += value + " ";
+            } else {
+              cfg_[key] = value;
             }
           }
         }
       }
       f.close();
-      if(cfg_.find("target") == cfg_.end()) {
-        cfg_["target"] = "exe";
-      }
     }
     else {
       std::cout << "ERR> Failed to open file: " << cfg << std::endl; 
@@ -60,6 +62,5 @@ namespace Cast {
   
   const std::string &Config::name() const {
     return cfg_.at("name");
-    // TODO need to handle when key is not there!
   }
 }

@@ -9,7 +9,7 @@ namespace Cast {
 
   class Config {
     public:
-      Config();
+      Config(const std::string &dir);
 
       ~Config();
 

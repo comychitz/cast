@@ -18,7 +18,7 @@ int Cast::build(const std::string &dir) {
   int ret = 0;
   std::cout << "cast: Entering directory [" << dir << "]" << std::endl;
   if(Util::chdir(dir)) {
-    Config cfg;
+    Config cfg(dir);
     if(Util::exists("cast.cfg")) {
       cfg.read("cast.cfg");
     }
@@ -56,12 +56,7 @@ bool Cast::buildCwd(const Config &cfg,
     if(cfg.target() == "so") {
       cmd << " -shared";
     }        
-    cmd << " -o " << dest;
-    if cfg.name().empty()) { 
-      cmd << dir;
-    } else {
-      cmd << cfg.name();
-    }
+    cmd << " -o " << dest << cfg.name();
     if(cfg.target() == "so") {
       cmd << ".so";
     }
