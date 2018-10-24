@@ -1,6 +1,6 @@
 #include <catch2/catch.hpp>
 #include <sys/stat.h>
-#include "../Util.h"
+#include "Util.h"
 
 TEST_CASE("Util::exists", "[util]") {
   REQUIRE(Cast::Util::exists("/tmp/weorijwer,23ori") == false);

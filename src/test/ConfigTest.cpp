@@ -1,5 +1,5 @@
 #include <catch2/catch.hpp>
-#include "../Config.h"
+#include "Config.h"
 
 TEST_CASE("Config read test #1", "[config]") {
   Cast::Config config("src");

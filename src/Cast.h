@@ -13,6 +13,8 @@ namespace Cast {
 
       int build(const std::string &dir);   
 
+      int clean(const std::string &dir);   
+
       inline
       std::string topInclude() const {
         return top_ + "/build/include";

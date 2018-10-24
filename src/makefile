@@ -2,7 +2,7 @@ src = $(wildcard *.cpp)
 obj = $(src:.cpp=.o)
 tests = $(wildcard test/*.cpp)
 
-CXXFLAGS=-std=c++14
+CXXFLAGS=-std=c++14 -I.
 
 cast: $(obj)
 	g++ $(CXXFLAGS) -o $@ $^ 
