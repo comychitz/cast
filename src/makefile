@@ -7,6 +7,9 @@ CXXFLAGS=-std=c++14 -I.
 cast: $(obj)
 	g++ $(CXXFLAGS) -o $@ $^ 
 
+install: 
+	cp cast /usr/local/bin
+
 check: 
 	g++ $(CXXFLAGS) $(tests) $(filter-out main.cpp, $(src)) -o test/cast_test
 	(cd test && ./cast_test)

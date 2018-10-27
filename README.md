@@ -56,3 +56,7 @@ subdir:myExe
 ```
 $ cd src && make
 ```
+install cast:
+```
+$ make install
+```
