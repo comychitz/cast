@@ -32,9 +32,9 @@ namespace Cast {
     bool symlink(const std::vector<std::string> &files, 
               const std::string &dest) {
 
-      for(auto file = files.begin(); file != files.end(); ++file) {
-        if(::symlink(file->c_str(), dest.c_str()) < 0) {
-          std::cout << "Link error: " << *file << " -> " << dest << ": " 
+      for(auto &file : files) {
+        if(::symlink(file.c_str(), dest.c_str()) < 0) {
+          std::cout << "Link error: " << file << " -> " << dest << ": " 
             << strerror(errno) << " (" << errno << ")";
           return false;
         }
@@ -65,8 +65,8 @@ namespace Cast {
              std::string file = entry->d_name;
              size_t pos = file.rfind(".");
              std::string ext = file.substr(pos);
-             for(auto f = filter.begin(); f != filter.end(); ++f) {
-               if(ext == *f) {
+             for(auto f : filter) {
+               if(ext == f) {
                  files.push_back(entry->d_name);
                  break;
                }

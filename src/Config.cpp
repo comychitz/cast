@@ -11,7 +11,8 @@ namespace Cast {
     cfg_["ldflags"] = "";
   }
 
-  Config::~Config() { }
+  Config::~Config() { 
+  }
 
   void Config::read(const std::string &cfg) {
     // future todo, make more user friendly

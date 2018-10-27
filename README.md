@@ -1,6 +1,11 @@
 # cast
-A simple and lightweight C/C++ build system with minimal user configuration. It
-supports unit testing and compiling with external dependencies.
+A simple and lightweight C/C++ build system with minimal user configuration.
+
+## Features
+* Minimal user configuration
+* Built-in unit testing support (using [Catch2](https://github.com/catchorg/Catch2))
+* Integrates with [Conan](https://github.com/conan-io/conan) for handling external dependencies
+* Support for cross compilation
 
 ## usage
 Just run cast from the top level of your project!
@@ -11,6 +16,10 @@ Simply clean up using:
 ```
 $ cast clean
 ```
+Run unit tests using:
+```
+$ cast check
+```
 
 ## project structure 
 With Cast, every directory under your `src` folder is automatically compiled
@@ -20,6 +29,8 @@ dynamic). Folders named `test` are targeted for unit tests.
 
 Folder names are used for naming the libraries and executables by default
 (libraries prefixed with lib).
+
+See example projects: [example #1](), [example #2](), [example #3]()
 
 ### cast.cfg
 A simple library configuration can contain the following:
@@ -53,8 +64,18 @@ subdir:myExe
 
 
 ## build cast
+### Requires
+* c++14 compiler
+* [Catch2](https://github.com/catchorg/Catch2) to be installed (for unit tests)
+
+To build cast simply run:
 ```
-$ cd src && make
+$ cd src
+$ make
+```
+Run unit tests using:
+```
+$ make check
 ```
 install cast:
 ```
