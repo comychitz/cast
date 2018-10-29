@@ -9,16 +9,20 @@ namespace Cast {
 
   static std::string top_;
 
+  static std::string topBuild() {
+    return top_ + "/build";
+  }
+
   static std::string topInclude() {
-    return top_ + "/build/include";
+    return topBuild() + "/include";
   }
 
   static std::string topLib() {
-    return top_ + "/build/lib";
+    return topBuild() + "/lib";
   }
 
   static std::string topBin() {
-    return top_ + "/build/bin";
+    return topBuild() + "/bin";
   }
 
   static bool buildCwd(const Config &cfg, 
@@ -27,7 +31,6 @@ namespace Cast {
     std::vector<std::string> exts = {".cpp", ".c", ".cc"};
     std::vector<std::string> sources = Util::getFiles(".", exts);
     std::stringstream cmd, archiveCmd;
-    // TODO - make all strings into constants
     cmd << "g++ " << "-I. -I" << topInclude() << " " << cfg.cflags()
       << " -L" << topLib() << " " << cfg.ldflags(); 
     for(auto &source : sources) {
@@ -94,7 +97,9 @@ namespace Cast {
         cfg.read("cast.cfg");
       }
       for(auto &dir : cfg.subdirs()) {
-        build(dir);
+        if(build(dir) != 0) {
+          ret = 1;
+        }
       }
       const std::string &dest = ".build/";
       Util::mkdirp(dest);
@@ -108,29 +113,49 @@ namespace Cast {
     return ret;
   }
 
+  static int clean(const std::string &dir) {
+    int ret = 0;
+    if(Util::chdir(dir)) {
+      Util::rmrf(".build");
+      Config cfg(dir);
+      if(Util::exists("cast.cfg")) {
+        cfg.read("cast.cfg");
+      }
+      for(auto &dir : cfg.subdirs()) {
+        if(clean(dir) != 0) {
+          ret = 1;
+        }
+      }
+    }
+    return ret;
+  }
+
   Cast::Cast(const std::string &topDirPath) { 
     top_ = topDirPath;
-    if(Util::chdir(top_)) {
-      Util::mkdirp(topBin());
-      Util::mkdirp(topInclude());
-      Util::mkdirp(topLib());
-    }
   }
 
   Cast::~Cast() {
   }
 
   int Cast::build() {
-    return ::Cast::build("src");
+    int ret = 1;
+    if(Util::chdir(top_)) {
+      Util::mkdirp(topBin());
+      Util::mkdirp(topInclude());
+      Util::mkdirp(topLib());
+      ret = ::Cast::build("src");
+      Util::chdir(top_);
+    }
+    return ret;
   } 
 
   int Cast::clean() {
-
-    //
-    // TODO
-    //
-
-    return 1;
+    Util::rmrf(topBuild());
+    int ret = 1;
+    if(Util::chdir(top_)) {
+      ret = ::Cast::clean("src");
+    }
+    return ret;
   }
 
   int Cast::check() {
