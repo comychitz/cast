@@ -19,7 +19,9 @@ namespace Cast {
     bool symlink(const std::vector<std::string> &files, 
                  const std::string &dest);
 
-    bool mkdirp(const std::string &dir);
+    void mkdirp(const std::string &dir);
+
+    void rmrf(const std::string &dir);
 
     std::vector<std::string> getFiles(const std::string &path, 
                                       const std::vector<std::string> &filter = 

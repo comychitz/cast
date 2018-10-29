@@ -11,11 +11,11 @@ namespace Cast {
 
       ~Cast();
 
-      int build(const std::string &dir);   
+      int build();
 
-      int clean(const std::string &dir);   
+      int clean();
 
-      int check(const std::string &dir);
+      int check();
 
       const std::string &getTopDir() const;
 

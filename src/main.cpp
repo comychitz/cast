@@ -10,12 +10,11 @@ int main(int argc, const char *argv[])
   }
   std::string cwd = getcwd(NULL, 0);
   Cast::Cast cast(cwd);
-  const std::string &srcdir = cwd + "/src";
   int ret = 1;
   if(cmd.empty()) {
-    ret = cast.build(srcdir);
+    ret = cast.build();
   } else if(cmd == "clean") {
-    ret = cast.clean(srcdir);
+    ret = cast.clean();
   } else {
     std::cout << "Unknown command: " << cmd << std::endl;
   }

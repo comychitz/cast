@@ -47,8 +47,12 @@ namespace Cast {
       return true;
     }
 
-    bool mkdirp(const std::string &dir) { 
-      return run("mkdir -p " + dir);
+    void mkdirp(const std::string &dir) { 
+      (void)run("mkdir -p " + dir);
+    }
+
+    void rmrf(const std::string &dir) {
+      (void)run("rm -rf " + dir);
     }
 
     std::vector<std::string> getFiles(const std::string &path, 

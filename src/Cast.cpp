@@ -85,12 +85,36 @@ namespace Cast {
     return ret; 
   }
 
+  static int build(const std::string &dir) {
+    int ret = 0;
+    std::cout << "cast: Entering directory [" << dir << "]" << std::endl;
+    if(Util::chdir(dir)) {
+      Config cfg(dir);
+      if(Util::exists("cast.cfg")) {
+        cfg.read("cast.cfg");
+      }
+      for(auto &dir : cfg.subdirs()) {
+        build(dir);
+      }
+      const std::string &dest = ".build/";
+      Util::mkdirp(dest);
+      if (!buildCwd(cfg, dir, dest) || 
+          !linkFiles(cfg, dir, dest)) {
+        ret = 1;
+      }
+    } else {
+      ret = 1;
+    }
+    return ret;
+  }
+
   Cast::Cast(const std::string &topDirPath) : top_(topDirPath) { 
     cast_ = this;
-    (void)Util::chdir(top_);
-    (void)Util::mkdirp(topBin());
-    (void)Util::mkdirp(topInclude());
-    (void)Util::mkdirp(topLib());
+    if(Util::chdir(top_)) {
+      Util::mkdirp(topBin());
+      Util::mkdirp(topInclude());
+      Util::mkdirp(topLib());
+    }
   }
 
   Cast::~Cast() {
@@ -101,30 +125,11 @@ namespace Cast {
     return top_;
   }
 
-  int Cast::build(const std::string &dir) {
-    int ret = 0;
-    std::cout << "cast: Entering directory [" << dir << "]" << std::endl;
-    if(Util::chdir(dir)) {
-      Config cfg(dir);
-      if(Util::exists("cast.cfg")) {
-        cfg.read("cast.cfg");
-      }
-      for(auto dir : cfg.subdirs()) {
-        build(dir);
-      }
-      const std::string dest = ".build/";
-      if (!Util::mkdirp(dest) ||
-          !buildCwd(cfg, dir, dest) || 
-          !linkFiles(cfg, dir, dest)) {
-        ret = 1;
-      }
-    } else {
-      ret = 1;
-    }
-    return ret;
-  }
+  int Cast::build() {
+    return ::Cast::build("src");
+  } 
 
-  int Cast::clean(const std::string &dir) {
+  int Cast::clean() {
 
     //
     // TODO
@@ -133,7 +138,7 @@ namespace Cast {
     return 1;
   }
 
-  int Cast::check(const std::string &dir) {
+  int Cast::check() {
 
     //
     // TODO
