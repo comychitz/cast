@@ -15,6 +15,8 @@ int main(int argc, const char *argv[])
     ret = cast.build();
   } else if(cmd == "clean") {
     ret = cast.clean();
+  } else if(cmd == "check") {
+    ret = cast.check();
   } else {
     std::cout << "Unknown command: " << cmd << std::endl;
   }

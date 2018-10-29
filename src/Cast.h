@@ -16,11 +16,6 @@ namespace Cast {
       int clean();
 
       int check();
-
-      const std::string &getTopDir() const;
-
-    private:
-      std::string top_;
   };
 }
 

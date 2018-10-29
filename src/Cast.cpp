@@ -7,18 +7,18 @@
 
 namespace Cast {
 
-  static Cast *cast_ = NULL;
+  static std::string top_;
 
   static std::string topInclude() {
-    return cast_->getTopDir() + "/build/include";
+    return top_ + "/build/include";
   }
 
   static std::string topLib() {
-    return cast_->getTopDir() + "/build/lib";
+    return top_ + "/build/lib";
   }
 
   static std::string topBin() {
-    return cast_->getTopDir() + "/build/bin";
+    return top_ + "/build/bin";
   }
 
   static bool buildCwd(const Config &cfg, 
@@ -108,8 +108,8 @@ namespace Cast {
     return ret;
   }
 
-  Cast::Cast(const std::string &topDirPath) : top_(topDirPath) { 
-    cast_ = this;
+  Cast::Cast(const std::string &topDirPath) { 
+    top_ = topDirPath;
     if(Util::chdir(top_)) {
       Util::mkdirp(topBin());
       Util::mkdirp(topInclude());
@@ -118,11 +118,6 @@ namespace Cast {
   }
 
   Cast::~Cast() {
-  }
-
-  const std::string &Cast::getTopDir() const
-  {
-    return top_;
   }
 
   int Cast::build() {
