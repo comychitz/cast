@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <unistd.h>
 
 namespace Cast {
 
@@ -46,10 +47,10 @@ namespace Cast {
     }
     if(!Util::run(cmd.str()) || 
        (!archiveCmd.str().empty() && !Util::run(archiveCmd.str()))) {
-      return 1;
+      return false;
     }
     // TODO need to run linker?
-    return 0;
+    return true;
   }
 
   static bool linkFiles(const Config &cfg, 
@@ -57,21 +58,24 @@ namespace Cast {
                         const std::string &dest) {
     bool ret = true;
     do {
+      bool includePath = true;
       std::vector<std::string> hExts = {".hpp", ".h"};
-      std::vector<std::string> headers = Util::getFiles(".", hExts);
+      std::vector<std::string> headers = Util::getFiles(".", hExts, 
+                                                        includePath);
       if(!Util::symlink(headers, topInclude())) {
         ret = false;
         break;
       }
       if(cfg.target() == "exe") {
-        std::vector<std::string> exes = {dest+dir};
+        std::string cwd = getcwd(NULL, 0);
+        std::vector<std::string> exes = {cwd+"/"+dest+dir};
         if(!Util::symlink(exes, topBin())) {
           ret = false;
           break;
         }
       } else {
         std::vector<std::string> lExts = {".so", ".a"};
-        std::vector<std::string> libs = Util::getFiles(".", lExts);
+        std::vector<std::string> libs = Util::getFiles(".", lExts, includePath);
         if(!Util::symlink(libs, topLib())) {
           ret = false;
           break;
@@ -83,6 +87,10 @@ namespace Cast {
 
   Cast::Cast(const std::string &topDirPath) : top_(topDirPath) { 
     cast_ = this;
+    (void)Util::chdir(top_);
+    (void)Util::mkdirp(topBin());
+    (void)Util::mkdirp(topInclude());
+    (void)Util::mkdirp(topLib());
   }
 
   Cast::~Cast() {

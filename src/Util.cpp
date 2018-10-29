@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <libgen.h>
 
 namespace Cast {
 
@@ -25,17 +26,21 @@ namespace Cast {
     }
 
     bool run(const std::string &cmd) {
-        std::cout << cmd << std::endl;
-        return (system(cmd.c_str()) == 0);
-      }
+      std::cout << cmd << std::endl;
+      return (system(cmd.c_str()) == 0);
+    }
+
+    std::string basename(const std::string &path) {
+      return ::basename((char*)path.c_str());
+    }
 
     bool symlink(const std::vector<std::string> &files, 
-              const std::string &dest) {
-
+                 const std::string &dest) {
       for(auto &file : files) {
-        if(::symlink(file.c_str(), dest.c_str()) < 0) {
-          std::cout << "Link error: " << file << " -> " << dest << ": " 
-            << strerror(errno) << " (" << errno << ")";
+        std::string target = dest + "/" + basename(file);
+        if(::symlink(file.c_str(), target.c_str()) < 0) {
+          std::cout << "Link error: " << file << " -> " << target << ": " 
+                    << strerror(errno) << " (" << errno << ")";
           return false;
         }
       }
@@ -47,7 +52,8 @@ namespace Cast {
     }
 
     std::vector<std::string> getFiles(const std::string &path, 
-                                      const std::vector<std::string> &filter) {
+                                      const std::vector<std::string> &filter,
+                                      bool includePath) {
       DIR *dir;
       std::vector<std::string> files;
       if((dir = opendir(path.c_str())) != NULL) {
@@ -67,7 +73,11 @@ namespace Cast {
              std::string ext = file.substr(pos);
              for(auto f : filter) {
                if(ext == f) {
-                 files.push_back(entry->d_name);
+                 if(includePath) {
+                    files.push_back(path+"/"+entry->d_name);
+                 } else {
+                   files.push_back(entry->d_name);
+                 }
                  break;
                }
              }
