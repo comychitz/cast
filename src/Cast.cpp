@@ -4,10 +4,12 @@
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
+#include <set>
 
 namespace Cast {
 
   static std::string top_;
+  static std::set<std::string> builtLibs_;
 
   static std::string topBuild() {
     return top_ + "/build";
@@ -28,8 +30,12 @@ namespace Cast {
   static bool buildCwd(const Config &cfg, 
                        const std::string &dir,
                        const std::string &dest) {
+    Util::mkdirp(dest);
     std::vector<std::string> exts = {".cpp", ".c", ".cc"};
     std::vector<std::string> sources = Util::getFiles(".", exts);
+    if(sources.empty()) {
+      return true;
+    }
     std::stringstream cmd, archiveCmd;
     cmd << "g++ " << "-I. -I" << topInclude() << " " << cfg.cflags()
       << " -L" << topLib() << " " << cfg.ldflags(); 
@@ -38,7 +44,7 @@ namespace Cast {
     }
     if(cfg.target() == "a") {
       cmd << " -c";
-      archiveCmd << "ar -q " << dest << dir << ".a *.o; rm -f *.o";
+      archiveCmd << "ar -q " << dest << cfg.name() << ".a *.o; rm -f *.o";
     } else {
       if(cfg.target() == "so") {
         cmd << " -shared";
@@ -46,13 +52,22 @@ namespace Cast {
       cmd << " -o " << dest << cfg.name();
       if(cfg.target() == "so") {
         cmd << ".so";
-      }
+      } 
+    } 
+    for(auto &lib : builtLibs_) {
+      cmd << " " << lib;
     }
+
     if(!Util::run(cmd.str()) || 
        (!archiveCmd.str().empty() && !Util::run(archiveCmd.str()))) {
       return false;
     }
-    // TODO need to run linker?
+
+    if(cfg.target() == "so" || cfg.target() == "a") {
+      std::string libPath = std::string(getcwd(NULL, 0)) + "/" + dest +
+        (cfg.target()=="so" ?  cfg.name()+".so" : cfg.name()+".a");
+      builtLibs_.insert(libPath);
+    }
     return true;
   }
 
@@ -62,23 +77,24 @@ namespace Cast {
     bool ret = true;
     do {
       bool includePath = true;
+      std::string cwd = getcwd(NULL, 0);
       std::vector<std::string> hExts = {".hpp", ".h"};
-      std::vector<std::string> headers = Util::getFiles(".", hExts, 
+      std::vector<std::string> headers = Util::getFiles(cwd, hExts, 
                                                         includePath);
       if(!Util::symlink(headers, topInclude())) {
         ret = false;
         break;
       }
       if(cfg.target() == "exe") {
-        std::string cwd = getcwd(NULL, 0);
-        std::vector<std::string> exes = {cwd+"/"+dest+dir};
+        std::vector<std::string> exes = {cwd+"/"+dest+cfg.name()};
         if(!Util::symlink(exes, topBin())) {
           ret = false;
           break;
         }
       } else {
         std::vector<std::string> lExts = {".so", ".a"};
-        std::vector<std::string> libs = Util::getFiles(".", lExts, includePath);
+        std::vector<std::string> libs = Util::getFiles(cwd+"/"+dest, 
+                                                       lExts, includePath);
         if(!Util::symlink(libs, topLib())) {
           ret = false;
           break;
@@ -91,6 +107,7 @@ namespace Cast {
   static int build(const std::string &dir) {
     int ret = 0;
     std::cout << "cast: Entering directory [" << dir << "]" << std::endl;
+    std::string cwd = getcwd(NULL, 0);
     if(Util::chdir(dir)) {
       Config cfg(dir);
       if(Util::exists("cast.cfg")) {
@@ -102,7 +119,6 @@ namespace Cast {
         }
       }
       const std::string &dest = ".build/";
-      Util::mkdirp(dest);
       if (!buildCwd(cfg, dir, dest) || 
           !linkFiles(cfg, dir, dest)) {
         ret = 1;
@@ -110,11 +126,13 @@ namespace Cast {
     } else {
       ret = 1;
     }
+    (void)Util::chdir(cwd);
     return ret;
   }
 
   static int clean(const std::string &dir) {
     int ret = 0;
+    std::string cwd = getcwd(NULL, 0);
     if(Util::chdir(dir)) {
       Util::rmrf(".build");
       Config cfg(dir);
@@ -126,6 +144,7 @@ namespace Cast {
           ret = 1;
         }
       }
+      (void)Util::chdir(cwd);
     }
     return ret;
   }

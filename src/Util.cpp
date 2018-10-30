@@ -40,7 +40,7 @@ namespace Cast {
         std::string target = dest + "/" + basename(file);
         if(::symlink(file.c_str(), target.c_str()) < 0) {
           std::cout << "Link error: " << file << " -> " << target << ": " 
-                    << strerror(errno) << " (" << errno << ")";
+                    << strerror(errno) << " (" << errno << ")" << std::endl;
           return false;
         }
       }
