@@ -1,9 +1,11 @@
-#include <MyClass.h>
+#include <Incrementer.h>
+#include <iostream>
 
 int main(int argc, const char *argv[])
 {
-  MyClass hi;
+  Incrementer inc;
+  inc.increment();
+  std::cout << inc.getCount() << std::endl;
   return 0;
 }
-
 
