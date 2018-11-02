@@ -9,6 +9,7 @@
 namespace Cast {
 
   static std::string top_;
+  static bool runTests_ = false;
   static std::set<std::string> builtLibs_;
 
   static std::string topBuild() {
@@ -104,6 +105,12 @@ namespace Cast {
     return ret; 
   }
 
+  static bool check(const std::string &dir) {
+    //
+    // TODO
+    //
+  } 
+
   static int build(const std::string &dir) {
     int ret = 0;
     std::cout << "cast: Entering directory [" << dir << "]" << std::endl;
@@ -123,6 +130,13 @@ namespace Cast {
           !linkFiles(cfg, dir, dest)) {
         ret = 1;
       }
+
+      if (runTests_) {
+        if(Util::exists("test") && !::Cast::check("test")) {
+          ret = 1;
+        }
+      }
+
     } else {
       ret = 1;
     }
@@ -147,6 +161,10 @@ namespace Cast {
       (void)Util::chdir(cwd);
     }
     return ret;
+  }
+
+  static int check(const std::string &dir) {
+
   }
 
   Cast::Cast(const std::string &topDirPath) { 
@@ -178,12 +196,8 @@ namespace Cast {
   }
 
   int Cast::check() {
-
-    //
-    // TODO
-    //
-
-    return 1;
+    runTests_ = true;
+    return build();
   }
 
 }
