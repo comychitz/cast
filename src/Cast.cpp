@@ -75,40 +75,42 @@ namespace Cast {
   static bool linkFiles(const Config &cfg, 
                         const std::string &dir,
                         const std::string &dest) {
-    bool ret = true;
-    do {
-      bool includePath = true;
-      std::string cwd = getcwd(NULL, 0);
-      std::vector<std::string> hExts = {".hpp", ".h"};
-      std::vector<std::string> headers = Util::getFiles(cwd, hExts, 
-                                                        includePath);
-      if(!Util::symlink(headers, topInclude())) {
+    bool ret = true, includePath = true;
+    std::string cwd = getcwd(NULL, 0);
+    std::vector<std::string> hExts = {".hpp", ".h"};
+    std::vector<std::string> headers = Util::getFiles(cwd, hExts, includePath);
+    if(!Util::symlink(headers, topInclude())) {
+      ret = false;
+    }
+    if(cfg.target() == "exe") {
+      std::vector<std::string> exes = {cwd+"/"+dest+cfg.name()};
+      if(!Util::symlink(exes, topBin())) {
         ret = false;
-        break;
       }
-      if(cfg.target() == "exe") {
-        std::vector<std::string> exes = {cwd+"/"+dest+cfg.name()};
-        if(!Util::symlink(exes, topBin())) {
-          ret = false;
-          break;
-        }
-      } else {
-        std::vector<std::string> lExts = {".so", ".a"};
-        std::vector<std::string> libs = Util::getFiles(cwd+"/"+dest, 
-                                                       lExts, includePath);
-        if(!Util::symlink(libs, topLib())) {
-          ret = false;
-          break;
-        }
+    } else {
+      std::vector<std::string> lExts = {".so", ".a"};
+      std::vector<std::string> libs = Util::getFiles(cwd+"/"+dest, 
+                                                     lExts, includePath);
+      if(!Util::symlink(libs, topLib())) {
+        ret = false;
       }
-    } while(false);
+    }
     return ret; 
   }
 
-  static bool check(const std::string &dir) {
-    //
-    // TODO
-    //
+  static bool check(const std::string &name,
+                    const std::string &dir) {
+    bool ret = false;
+    std::string cwd = getcwd(NULL, 0);
+    if(Util::chdir(dir)) {
+      const std::string &testName = name+"Test", &dest = "../.build/";
+      Config testCfg(testName);
+      if(buildCwd(testCfg, dir, dest)) {
+        ret = Util::run(dest+testName);
+      }
+    }
+    (void)Util::chdir(cwd);
+    return ret;
   } 
 
   static int build(const std::string &dir) {
@@ -130,13 +132,11 @@ namespace Cast {
           !linkFiles(cfg, dir, dest)) {
         ret = 1;
       }
-
       if (runTests_) {
-        if(Util::exists("test") && !::Cast::check("test")) {
+        if(Util::exists("test") && !::Cast::check(cfg.name(), "test")) {
           ret = 1;
         }
       }
-
     } else {
       ret = 1;
     }
@@ -161,10 +161,6 @@ namespace Cast {
       (void)Util::chdir(cwd);
     }
     return ret;
-  }
-
-  static int check(const std::string &dir) {
-
   }
 
   Cast::Cast(const std::string &topDirPath) { 

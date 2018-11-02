@@ -11,7 +11,7 @@ namespace Cast {
     public:
       Config(const std::string &dir);
 
-      ~Config();
+      virtual ~Config();
 
       void read(const std::string &cfg);
 
@@ -25,7 +25,7 @@ namespace Cast {
     
       const std::string &name() const;
 
-    private:
+    protected:
       std::map<std::string, std::string> cfg_;
       std::vector<std::string> subdirs_;
   };
