@@ -61,37 +61,35 @@ namespace Cast {
       DIR *dir;
       std::vector<std::string> files;
       if((dir = opendir(path.c_str())) != NULL) {
-        struct dirent *entry;
-         while((entry = readdir(dir)) != NULL) {
-           struct stat statbuf;
-           std::string fpath = path + "/" + entry->d_name;
-           if(stat(fpath.c_str(), &statbuf) != 0) {
-             continue;
-           }
-           if(S_ISREG(statbuf.st_mode)) {
-             if(filter.empty()) {
-              files.push_back(entry->d_name);
-             }
-             std::string file = entry->d_name;
-             size_t pos = file.rfind(".");
-             std::string ext = file.substr(pos);
-             for(auto f : filter) {
-               if(ext == f) {
-                 if(includePath) {
-                    files.push_back(path+"/"+entry->d_name);
-                 } else {
-                   files.push_back(entry->d_name);
-                 }
-                 break;
-               }
-             }
-           }
-         }
-         closedir (dir);
-      } 
-      else {
         std::cout << "ERR> Unable to read dir: " << path << std::endl;
+        return files;
       }
+      struct dirent *entry;
+      while((entry = readdir(dir)) != NULL) {
+        struct stat statbuf;
+        std::string fpath = path + "/" + entry->d_name;
+        if(stat(fpath.c_str(), &statbuf) != 0 || 
+           !S_ISREG(statbuf.st_mode)) {
+          continue;
+        }
+        if(filter.empty()) {
+          files.push_back(entry->d_name);
+        }
+        std::string file = entry->d_name;
+        size_t pos = file.rfind(".");
+        std::string ext = file.substr(pos);
+        for(auto f : filter) {
+          if(ext == f) {
+            if(includePath) {
+              files.push_back(path+"/"+entry->d_name);
+            } else {
+              files.push_back(entry->d_name);
+            }
+            break;
+          }
+        }
+      }
+      closedir (dir);
       return files;
     }
   }
