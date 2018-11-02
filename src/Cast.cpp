@@ -28,7 +28,8 @@ namespace Cast {
     return topBuild() + "/bin";
   }
 
-  static void buildCompileCmds(const Config &cfg, const std::string &dest,
+  static void buildCompileCmds(const std::vector<std::string> &sources,
+                               const Config &cfg, const std::string &dest,
                                std::string &cmd, std::string &archiveCmd)
   {
     std::stringstream cmdss, archiveCmdss;
@@ -53,7 +54,7 @@ namespace Cast {
       cmdss << " " << lib;
     }
     cmd = cmdss.str();
-    archvieCmd = archiveCmdss.str();
+    archiveCmd = archiveCmdss.str();
   }
 
   static bool buildCwd(const Config &cfg, 
@@ -65,9 +66,9 @@ namespace Cast {
     if(sources.empty()) {
       return true;
     }
-    buildCompileCmds(cfg, dest, cmd, archiveCmd); 
-    if(!Util::run(cmd.str()) || 
-       (!archiveCmd.empty() && !Util::run(archiveCmd.str()))) {
+    std::string cmd, archiveCmd;
+    buildCompileCmds(sources, cfg, dest, cmd, archiveCmd); 
+    if(!Util::run(cmd) || (!archiveCmd.empty() && !Util::run(archiveCmd))) {
       return false;
     }
     if(cfg.target() == "so" || cfg.target() == "a") {

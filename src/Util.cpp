@@ -80,11 +80,8 @@ namespace Cast {
         std::string ext = file.substr(pos);
         for(auto f : filter) {
           if(ext == f) {
-            if(includePath) {
-              files.push_back(path+"/"+entry->d_name);
-            } else {
-              files.push_back(entry->d_name);
-            }
+            files.push_back(includePath ? path+"/"+entry->d_name :
+                                          entry->d_name);
             break;
           }
         }
