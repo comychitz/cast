@@ -28,6 +28,34 @@ namespace Cast {
     return topBuild() + "/bin";
   }
 
+  static void buildCompileCmds(const Config &cfg, const std::string &dest,
+                               std::string &cmd, std::string &archiveCmd)
+  {
+    std::stringstream cmdss, archiveCmdss;
+    cmdss << "g++ " << "-I. -I" << topInclude() << " " << cfg.cflags()
+          << " -L" << topLib() << " " << cfg.ldflags(); 
+    for(auto &source : sources) {
+      cmdss << " " << source;
+    }
+    if(cfg.target() == "a") {
+      cmdss << " -c";
+      archiveCmdss << "ar -q " << dest << cfg.name() << ".a *.o; rm -f *.o";
+    } else {
+      if(cfg.target() == "so") {
+        cmdss << " -shared";
+      }        
+      cmdss << " -o " << dest << cfg.name();
+      if(cfg.target() == "so") {
+        cmdss << ".so";
+      } 
+    } 
+    for(auto &lib : builtLibs_) {
+      cmdss << " " << lib;
+    }
+    cmd = cmdss.str();
+    archvieCmd = archiveCmdss.str();
+  }
+
   static bool buildCwd(const Config &cfg, 
                        const std::string &dir,
                        const std::string &dest) {
@@ -37,33 +65,11 @@ namespace Cast {
     if(sources.empty()) {
       return true;
     }
-    std::stringstream cmd, archiveCmd;
-    cmd << "g++ " << "-I. -I" << topInclude() << " " << cfg.cflags()
-      << " -L" << topLib() << " " << cfg.ldflags(); 
-    for(auto &source : sources) {
-      cmd << " " << source;
-    }
-    if(cfg.target() == "a") {
-      cmd << " -c";
-      archiveCmd << "ar -q " << dest << cfg.name() << ".a *.o; rm -f *.o";
-    } else {
-      if(cfg.target() == "so") {
-        cmd << " -shared";
-      }        
-      cmd << " -o " << dest << cfg.name();
-      if(cfg.target() == "so") {
-        cmd << ".so";
-      } 
-    } 
-    for(auto &lib : builtLibs_) {
-      cmd << " " << lib;
-    }
-
+    buildCompileCmds(cfg, dest, cmd, archiveCmd); 
     if(!Util::run(cmd.str()) || 
-       (!archiveCmd.str().empty() && !Util::run(archiveCmd.str()))) {
+       (!archiveCmd.empty() && !Util::run(archiveCmd.str()))) {
       return false;
     }
-
     if(cfg.target() == "so" || cfg.target() == "a") {
       std::string libPath = std::string(getcwd(NULL, 0)) + "/" + dest +
         (cfg.target()=="so" ?  cfg.name()+".so" : cfg.name()+".a");
@@ -114,52 +120,52 @@ namespace Cast {
   } 
 
   static int build(const std::string &dir) {
-    int ret = 0;
-    std::cout << "cast: Entering directory [" << dir << "]" << std::endl;
     std::string cwd = getcwd(NULL, 0);
-    if(Util::chdir(dir)) {
-      Config cfg(dir);
-      if(Util::exists("cast.cfg")) {
-        cfg.read("cast.cfg");
-      }
-      for(auto &dir : cfg.subdirs()) {
-        if(build(dir) != 0) {
-          ret = 1;
-        }
-      }
-      const std::string &dest = ".build/";
-      if (!buildCwd(cfg, dir, dest) || 
-          !linkFiles(cfg, dir, dest)) {
+    std::cout << "cast: Entering directory [" << dir << "]" << std::endl;
+    if(!Util::chdir(dir)) {
+      return 1; 
+    }
+    int ret = 0;
+    Config cfg(dir);
+    if(Util::exists("cast.cfg")) {
+      cfg.read("cast.cfg");
+    }
+    for(auto &dir : cfg.subdirs()) {
+      if(build(dir) != 0) {
         ret = 1;
       }
-      if (runTests_) {
-        if(Util::exists("test") && !::Cast::check(cfg.name(), "test")) {
-          ret = 1;
-        }
-      }
-    } else {
+    }
+    const std::string &dest = ".build/";
+    if (!buildCwd(cfg, dir, dest) || 
+        !linkFiles(cfg, dir, dest)) {
       ret = 1;
+    }
+    if (runTests_) {
+      if(Util::exists("test") && !::Cast::check(cfg.name(), "test")) {
+        ret = 1;
+      }
     }
     (void)Util::chdir(cwd);
     return ret;
   }
 
   static int clean(const std::string &dir) {
-    int ret = 0;
     std::string cwd = getcwd(NULL, 0);
     if(Util::chdir(dir)) {
-      Util::rmrf(".build");
-      Config cfg(dir);
-      if(Util::exists("cast.cfg")) {
-        cfg.read("cast.cfg");
-      }
-      for(auto &dir : cfg.subdirs()) {
-        if(clean(dir) != 0) {
-          ret = 1;
-        }
-      }
-      (void)Util::chdir(cwd);
+      return 1;
     }
+    int ret = 0;
+    Util::rmrf(".build");
+    Config cfg(dir);
+    if(Util::exists("cast.cfg")) {
+      cfg.read("cast.cfg");
+    }
+    for(auto &dir : cfg.subdirs()) {
+      if(clean(dir) != 0) {
+        ret = 1;
+      }
+    }
+    (void)Util::chdir(cwd);
     return ret;
   }
 
