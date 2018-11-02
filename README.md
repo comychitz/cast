@@ -3,7 +3,7 @@ A simple and lightweight C/C++ build system with minimal user configuration.
 
 ## Features
 * Minimal user configuration
-* Built-in unit testing support (using [Catch2](https://github.com/catchorg/Catch2))
+* Built-in unit testing support
 * Integrates with [Conan](https://github.com/conan-io/conan) for handling external dependencies
 * Support for cross compilation
 
@@ -66,7 +66,7 @@ subdir:myExe
 ## build cast
 ### Requires
 * c++14 compiler
-* [Catch2](https://github.com/catchorg/Catch2) to be installed (for unit tests)
+* [Catch2](https://github.com/catchorg/Catch2) to be installed (for running cast's unit tests)
 
 To build cast simply run:
 ```
