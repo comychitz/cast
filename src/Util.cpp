@@ -60,7 +60,7 @@ namespace Cast {
                                       bool includePath) {
       DIR *dir;
       std::vector<std::string> files;
-      if((dir = opendir(path.c_str())) != NULL) {
+      if((dir = opendir(path.c_str())) == NULL) {
         std::cout << "ERR> Unable to read dir: " << path << std::endl;
         return files;
       }

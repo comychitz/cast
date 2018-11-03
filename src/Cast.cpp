@@ -152,7 +152,7 @@ namespace Cast {
 
   static int clean(const std::string &dir) {
     std::string cwd = getcwd(NULL, 0);
-    if(Util::chdir(dir)) {
+    if(!Util::chdir(dir)) {
       return 1;
     }
     int ret = 0;
@@ -179,6 +179,7 @@ namespace Cast {
 
   int Cast::build() {
     int ret = 1;
+    builtLibs_.clear();
     if(Util::chdir(top_)) {
       Util::mkdirp(topBin());
       Util::mkdirp(topInclude());
