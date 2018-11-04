@@ -112,6 +112,7 @@ namespace Cast {
     if(Util::chdir(dir)) {
       const std::string &testName = name+"Test", &dest = "../.build/";
       Config testCfg(testName);
+      testCfg.cflags("-std=c++14");
       if(buildCwd(testCfg, dir, dest)) {
         ret = Util::run(dest+testName);
       }

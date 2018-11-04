@@ -49,4 +49,5 @@ TEST_CASE("test building example project 2", "[catch]") {
   CHECK(Cast::Util::exists(cwd +"/../../examples/example2/src/.build/commonTest") == true);
 
   CHECK(caster.clean() == 0);
+  CHECK(Cast::Util::chdir(cwd) == true);
 }

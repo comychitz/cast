@@ -1,9 +1,10 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
+#include "Incrementer.h"
 
 TEST_CASE("incrementer test", "[incrementer]") {
   Incrementer inc;
-  REQUIRES(inc.getCount() == 0);
+  REQUIRE(inc.getCount() == 0);
   inc.increment();
-  REQUIRES(inc.getCount() == 1);
+  REQUIRE(inc.getCount() == 1);
 }

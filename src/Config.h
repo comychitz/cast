@@ -19,6 +19,8 @@ namespace Cast {
 
       const std::vector<std::string> &subdirs() const;
 
+      void cflags(const std::string &val);
+      
       const std::string &cflags() const;
 
       const std::string &ldflags() const;

@@ -52,6 +52,10 @@ namespace Cast {
     return subdirs_;
   }
 
+  void Config::cflags(const std::string &val) {
+    cfg_["cflags"] = val;
+  }
+
   const std::string &Config::cflags() const {
     return cfg_.at("cflags");
   }
