@@ -28,6 +28,26 @@ namespace Cast {
     return topBuild() + "/bin";
   }
 
+  static void setupTopBuild() {
+    Util::mkdirp(topBin());
+    Util::mkdirp(topInclude());
+    Util::mkdirp(topLib());
+  }
+
+  class DirectoryScope {
+    std::string cwd_;
+    public: 
+      explicit DirectoryScope(const std::string &dir) : cwd_(getcwd(NULL, 0)) {
+        if(!Util::chdir(dir)) {
+          _exit(1);
+        }
+      }
+
+      ~DirectoryScope() {
+        (void)Util::chdir(cwd_);
+      }
+  };
+
   static void buildCompileCmds(const std::vector<std::string> &sources,
                                const Config &cfg, const std::string &dest,
                                std::string &cmd, std::string &archiveCmd)
@@ -108,25 +128,19 @@ namespace Cast {
   static bool check(const std::string &name,
                     const std::string &dir) {
     bool ret = false;
-    std::string cwd = getcwd(NULL, 0);
-    if(Util::chdir(dir)) {
-      const std::string &testName = name+"Test", &dest = "../.build/";
-      Config testCfg(testName);
-      testCfg.cflags("-std=c++14");
-      if(buildCwd(testCfg, dir, dest)) {
-        ret = Util::run(dest+testName);
-      }
+    DirectoryScope dirScope(dir);
+    const std::string &testName = name+"Test", &dest = "../.build/";
+    Config testCfg(testName);
+    testCfg.cflags("-std=c++14");
+    if(buildCwd(testCfg, dir, dest)) {
+      ret = Util::run(dest+testName);
     }
-    (void)Util::chdir(cwd);
     return ret;
   } 
 
   static int build(const std::string &dir) {
-    std::string cwd = getcwd(NULL, 0);
     std::cout << "cast: Entering directory [" << dir << "]" << std::endl;
-    if(!Util::chdir(dir)) {
-      return 1; 
-    }
+    DirectoryScope dirScope(dir);
     int ret = 0;
     Config cfg(dir);
     if(Util::exists("cast.cfg")) {
@@ -146,16 +160,12 @@ namespace Cast {
         ret = 1;
       }
     }
-    (void)Util::chdir(cwd);
     return ret;
   }
 
   static int clean(const std::string &dir) {
-    std::string cwd = getcwd(NULL, 0);
-    if(!Util::chdir(dir)) {
-      return 1;
-    }
     int ret = 0;
+    DirectoryScope dirScope(dir);
     Util::rmrf(".build");
     Config cfg(dir);
     if(Util::exists("cast.cfg")) {
@@ -166,7 +176,6 @@ namespace Cast {
         ret = 1;
       }
     }
-    (void)Util::chdir(cwd);
     return ret;
   }
 
@@ -178,25 +187,16 @@ namespace Cast {
   }
 
   int Cast::build() {
-    int ret = 1;
     builtLibs_.clear();
-    if(Util::chdir(top_)) {
-      Util::mkdirp(topBin());
-      Util::mkdirp(topInclude());
-      Util::mkdirp(topLib());
-      ret = ::Cast::build("src");
-      Util::chdir(top_);
-    }
-    return ret;
+    DirectoryScope dirScope(top_); 
+    setupTopBuild();
+    return ::Cast::build("src");
   } 
 
   int Cast::clean() {
     Util::rmrf(topBuild());
-    int ret = 1;
-    if(Util::chdir(top_)) {
-      ret = ::Cast::clean("src");
-    }
-    return ret;
+    DirectoryScope dirScope(top_);
+    return ::Cast::clean("src");
   }
 
   int Cast::check() {

@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <libgen.h>
+#include <errno.h>
 
 namespace Cast {
 
@@ -12,6 +13,8 @@ namespace Cast {
 
     bool chdir(const std::string &dir) {
       if(::chdir(dir.c_str()) < 0) {
+        std::cout << "chdir() error: " << dir << ": " << strerror(errno) << " (" 
+                  << errno << ")" << std::endl;
         return false;
       }
       return true;
