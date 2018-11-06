@@ -57,28 +57,6 @@ namespace Cast {
     archiveCmd = archiveCmdss.str();
   }
 
-  static bool buildCwd(const Config &cfg, 
-                       const std::string &dir,
-                       const std::string &dest) {
-    Util::mkdirp(dest);
-    std::vector<std::string> exts = {".cpp", ".c", ".cc"};
-    std::vector<std::string> sources = Util::getFiles(".", exts);
-    if(sources.empty()) {
-      return true;
-    }
-    std::string cmd, archiveCmd;
-    buildCompileCmds(sources, cfg, dest, cmd, archiveCmd); 
-    if(!Util::run(cmd) || (!archiveCmd.empty() && !Util::run(archiveCmd))) {
-      return false;
-    }
-    if(cfg.target() == "so" || cfg.target() == "a") {
-      std::string libPath = std::string(getcwd(NULL, 0)) + "/" + dest +
-        (cfg.target()=="so" ?  cfg.name()+".so" : cfg.name()+".a");
-      builtLibs_.insert(libPath);
-    }
-    return true;
-  }
-
   static bool linkFiles(const Config &cfg, 
                         const std::string &dir,
                         const std::string &dest) {
@@ -104,6 +82,28 @@ namespace Cast {
     }
     return ret; 
   }
+
+  static bool buildCwd(const Config &cfg, 
+                       const std::string &dir,
+                       const std::string &dest) {
+    Util::mkdirp(dest);
+    std::vector<std::string> exts = {".cpp", ".c", ".cc"};
+    std::vector<std::string> sources = Util::getFiles(".", exts);
+    if(sources.empty()) {
+      return true;
+    }
+    std::string cmd, archiveCmd;
+    buildCompileCmds(sources, cfg, dest, cmd, archiveCmd); 
+    if(!Util::run(cmd) || (!archiveCmd.empty() && !Util::run(archiveCmd))) {
+      return false;
+    }
+    if(cfg.target() == "so" || cfg.target() == "a") {
+      std::string libPath = std::string(getcwd(NULL, 0)) + "/" + dest +
+        (cfg.target()=="so" ?  cfg.name()+".so" : cfg.name()+".a");
+      builtLibs_.insert(libPath);
+    }
+    return dir == "test" ? true : linkFiles(cfg, dir, dest);
+  } 
 
   static bool check(const std::string &name,
                     const std::string &dir) {
@@ -138,8 +138,7 @@ namespace Cast {
       }
     }
     const std::string &dest = ".build/";
-    if (!buildCwd(cfg, dir, dest) || 
-        !linkFiles(cfg, dir, dest)) {
+    if (!buildCwd(cfg, dir, dest)) {
       ret = 1;
     }
     if (runTests_) {
