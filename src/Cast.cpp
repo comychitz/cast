@@ -5,6 +5,7 @@
 #include <sstream>
 #include <unistd.h>
 #include <set>
+#include <sys/stat.h>
 
 namespace Cast {
 
@@ -48,6 +49,16 @@ namespace Cast {
       }
   };
 
+  static std::string getTargetName(const Config &cfg)  {
+    std::string name = cfg.name();
+    if(cfg.target() == "so") {
+      name += ".so";
+    } else if(cfg.target() == "a") {
+      name += ".a";
+    }
+    return name;
+  }
+
   static void buildCompileCmds(const std::vector<std::string> &sources,
                                const Config &cfg, const std::string &dest,
                                std::string &cmd, std::string &archiveCmd)
@@ -60,21 +71,50 @@ namespace Cast {
     }
     if(cfg.target() == "a") {
       cmdss << " -c";
-      archiveCmdss << "ar -q " << dest << cfg.name() << ".a *.o; rm -f *.o";
+      archiveCmdss << "ar -q " << dest << getTargetName(cfg) << " *.o; rm -f *.o";
     } else {
       if(cfg.target() == "so") {
         cmdss << " -shared";
       }        
-      cmdss << " -o " << dest << cfg.name();
-      if(cfg.target() == "so") {
-        cmdss << ".so";
-      } 
+      cmdss << " -o " << dest << getTargetName(cfg);
     } 
     for(auto &lib : builtLibs_) {
       cmdss << " " << lib;
     }
     cmd = cmdss.str();
     archiveCmd = archiveCmdss.str();
+  }
+
+  static time_t getFileModTime(const std::string &path) {
+    struct stat statbuf;
+    if(stat(path.c_str(), &statbuf) != 0) {
+      return 0;
+    }
+    return statbuf.st_mtimespec.tv_sec;
+  }
+
+  static time_t getNewestSourceModTime(const std::vector<std::string> &sources) {
+    time_t newest = 0;
+    std::vector<std::string>::const_iterator source;
+    for(source = sources.begin(); source != sources.end(); ++source) {
+      time_t modTime = getFileModTime(*source);
+      if(modTime == 0) {
+        return 0;
+      } else if(modTime > newest) {
+        newest = modTime;
+      }
+    }
+    return newest;
+  }
+
+  static bool sourceFilesChanged(const std::string &dest, const Config &cfg) {
+    std::vector<std::string> sources = Util::getFiles(".");
+    time_t newestSourceModTime = getNewestSourceModTime(sources);
+    if(newestSourceModTime == 0) {
+      return false;
+    }
+    time_t targetModTime = getFileModTime(dest+"/"+getTargetName(cfg));
+    return targetModTime < newestSourceModTime;
   }
 
   static bool linkFiles(const Config &cfg, 
@@ -110,6 +150,9 @@ namespace Cast {
     std::vector<std::string> exts = {".cpp", ".c", ".cc"};
     std::vector<std::string> sources = Util::getFiles(".", exts);
     if(sources.empty()) {
+      return true;
+    }
+    if(!sourceFilesChanged(dest, cfg)) {
       return true;
     }
     std::string cmd, archiveCmd;
