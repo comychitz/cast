@@ -93,28 +93,11 @@ namespace Cast {
     return statbuf.st_mtimespec.tv_sec;
   }
 
-  static time_t getNewestSourceModTime(const std::vector<std::string> &sources) {
-    time_t newest = 0;
-    std::vector<std::string>::const_iterator source;
-    for(source = sources.begin(); source != sources.end(); ++source) {
-      time_t modTime = getFileModTime(*source);
-      if(modTime == 0) {
-        return 0;
-      } else if(modTime > newest) {
-        newest = modTime;
-      }
-    }
-    return newest;
-  }
-
-  static bool sourceFilesChanged(const std::string &dest, const Config &cfg) {
-    std::vector<std::string> sources = Util::getFiles(".");
-    time_t newestSourceModTime = getNewestSourceModTime(sources);
-    if(newestSourceModTime == 0) {
-      return false;
-    }
-    time_t targetModTime = getFileModTime(dest+"/"+getTargetName(cfg));
-    return targetModTime < newestSourceModTime;
+  static bool checkFilesUpToDate(const std::string &dest, const Config &cfg,
+                                 std::vector<std::string> &sources) {
+    //
+    // TODO - filter files that don't need to be recompiled again
+    //
   }
 
   static bool linkFiles(const Config &cfg, 
@@ -149,10 +132,8 @@ namespace Cast {
     Util::mkdirp(dest);
     std::vector<std::string> exts = {".cpp", ".c", ".cc"};
     std::vector<std::string> sources = Util::getFiles(".", exts);
+    checkFilesUpToDate(cfg, dest, sources);
     if(sources.empty()) {
-      return true;
-    }
-    if(!sourceFilesChanged(dest, cfg)) {
       return true;
     }
     std::string cmd, archiveCmd;
