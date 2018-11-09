@@ -41,6 +41,7 @@ namespace Cast {
                  const std::string &dest) {
       for(auto &file : files) {
         std::string target = dest + "/" + basename(file);
+        (void)unlink(target.c_str());
         if(::symlink(file.c_str(), target.c_str()) < 0) {
           std::cout << "Link error: " << file << " -> " << target << ": " 
                     << strerror(errno) << " (" << errno << ")" << std::endl;
@@ -51,7 +52,9 @@ namespace Cast {
     }
 
     void mkdirp(const std::string &dir) { 
-      (void)run("mkdir -p " + dir);
+      if(!exists(dir)) {
+        (void)run("mkdir -p " + dir);
+      }
     }
 
     void rmrf(const std::string &dir) {

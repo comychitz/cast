@@ -93,11 +93,27 @@ namespace Cast {
     return statbuf.st_mtimespec.tv_sec;
   }
 
-  static bool checkFilesUpToDate(const std::string &dest, const Config &cfg,
+  static time_t getNewestSourceModTime(const std::vector<std::string> &sources) {
+    time_t newest = 0;
+    std::vector<std::string>::const_iterator source;
+    for(source = sources.begin(); source != sources.end(); ++source) {
+      time_t modTime = getFileModTime(*source);
+      if(modTime == 0) {
+        return 0;
+      } else if(modTime > newest) {
+        newest = modTime;
+      }
+    }
+    return newest;
+  }
+
+  static void checkFilesUpToDate(const std::string &dest, const Config &cfg,
                                  std::vector<std::string> &sources) {
-    //
-    // TODO - filter files that don't need to be recompiled again
-    //
+    time_t sourceModTime = getNewestSourceModTime(sources);
+    time_t targetModTime = getFileModTime(dest+getTargetName(cfg));
+    if(sourceModTime < targetModTime) {
+      sources.clear();
+    }
   }
 
   static bool linkFiles(const Config &cfg, 
@@ -132,8 +148,12 @@ namespace Cast {
     Util::mkdirp(dest);
     std::vector<std::string> exts = {".cpp", ".c", ".cc"};
     std::vector<std::string> sources = Util::getFiles(".", exts);
-    checkFilesUpToDate(cfg, dest, sources);
     if(sources.empty()) {
+      return true;
+    }
+    checkFilesUpToDate(dest, cfg, sources);
+    if(sources.empty()) {
+      std::cout << "Directory up to date" << std::endl;
       return true;
     }
     std::string cmd, archiveCmd;
@@ -142,8 +162,8 @@ namespace Cast {
       return false;
     }
     if(cfg.target() == "so" || cfg.target() == "a") {
-      std::string libPath = std::string(getcwd(NULL, 0)) + "/" + dest +
-        (cfg.target()=="so" ?  cfg.name()+".so" : cfg.name()+".a");
+      std::string libPath = std::string(getcwd(NULL, 0)) + "/" + 
+                            dest + getTargetName(cfg);
       builtLibs_.insert(libPath);
     }
     return dir == "test" ? true : linkFiles(cfg, dir, dest);
