@@ -145,7 +145,6 @@ namespace Cast {
   static bool buildCwd(const Config &cfg, 
                        const std::string &dir,
                        const std::string &dest) {
-    Util::mkdirp(dest);
     std::vector<std::string> exts = {".cpp", ".c", ".cc"};
     std::vector<std::string> sources = Util::getFiles(".", exts);
     if(sources.empty()) {
@@ -153,9 +152,10 @@ namespace Cast {
     }
     checkFilesUpToDate(dest, cfg, sources);
     if(sources.empty()) {
-      std::cout << "Directory up to date" << std::endl;
+      std::cout << "cast: Target (" << getTargetName(cfg) << ") up to date" << std::endl;
       return true;
     }
+    Util::mkdirp(dest);
     std::string cmd, archiveCmd;
     buildCompileCmds(sources, cfg, dest, cmd, archiveCmd); 
     if(!Util::run(cmd) || (!archiveCmd.empty() && !Util::run(archiveCmd))) {
@@ -183,7 +183,8 @@ namespace Cast {
   } 
 
   static int build(const std::string &dir) {
-    std::cout << "cast: Entering directory [" << dir << "]" << std::endl;
+    std::cout << "cast: Entering directory [" << getcwd(NULL, 0) << "/" << dir
+              << "]" << std::endl;
     DirectoryScope dirScope(dir);
     int ret = 0;
     Config cfg(dir);
@@ -204,6 +205,7 @@ namespace Cast {
         ret = 1;
       }
     }
+    std::cout << "cast: Leaving directory [" << getcwd(NULL, 0) << "]" << std::endl;
     return ret;
   }
 
