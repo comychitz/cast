@@ -1,4 +1,4 @@
-#include "Cast.h"
+#include "Caster.h"
 #include "Util.h"
 #include <vector>
 #include <iostream>
@@ -225,27 +225,27 @@ namespace Cast {
     return ret;
   }
 
-  Cast::Cast(const std::string &topDirPath) { 
+  Caster::Caster(const std::string &topDirPath) { 
     top_ = topDirPath;
   }
 
-  Cast::~Cast() {
+  Caster::~Caster() {
   }
 
-  int Cast::build() {
+  int Caster::build() {
     builtLibs_.clear();
     DirectoryScope dirScope(top_); 
     setupTopBuild();
     return ::Cast::build("src");
   } 
 
-  int Cast::clean() {
+  int Caster::clean() {
     Util::rmrf(topBuild());
     DirectoryScope dirScope(top_);
     return ::Cast::clean("src");
   }
 
-  int Cast::check() {
+  int Caster::check() {
     runTests_ = true;
     return build();
   }

@@ -1,4 +1,4 @@
-#include "Cast.h"
+#include "Caster.h"
 #include <unistd.h>
 #include <iostream>
 
@@ -9,14 +9,14 @@ int main(int argc, const char *argv[])
     cmd = argv[1];
   }
   std::string cwd = getcwd(NULL, 0);
-  Cast::Cast cast(cwd);
+  Cast::Caster caster(cwd);
   int ret = 1;
   if(cmd.empty()) {
-    ret = cast.build();
+    ret = caster.build();
   } else if(cmd == "clean") {
-    ret = cast.clean();
+    ret = caster.clean();
   } else if(cmd == "check") {
-    ret = cast.check();
+    ret = caster.check();
   } else {
     std::cout << "Unknown command: " << cmd << std::endl;
   }

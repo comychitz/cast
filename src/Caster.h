@@ -1,15 +1,15 @@
-#ifndef _CAST_H_
-#define _CAST_H_
+#ifndef _CASTER_H_
+#define _CASTER_H_
 
 #include "Config.h"
 
 namespace Cast {
 
-  class Cast {
+  class Caster {
     public:
-      explicit Cast(const std::string &topDirPath); 
+      explicit Caster(const std::string &topDirPath); 
 
-      ~Cast();
+      ~Caster();
 
       int build();
 
