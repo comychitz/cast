@@ -1,11 +1,10 @@
 #include "Caster.h"
 #include "Util.h"
+#include "Compiler.h"
 #include <vector>
 #include <iostream>
-#include <sstream>
 #include <unistd.h>
 #include <set>
-#include <sys/stat.h>
 
 namespace Cast {
 
@@ -47,74 +46,7 @@ namespace Cast {
       ~DirectoryScope() {
         (void)Util::chdir(cwd_);
       }
-  };
-
-  static std::string getTargetName(const Config &cfg)  {
-    std::string name = cfg.name();
-    if(cfg.target() == "so") {
-      name += ".so";
-    } else if(cfg.target() == "a") {
-      name += ".a";
-    }
-    return name;
-  }
-
-  static void buildCompileCmds(const std::vector<std::string> &sources,
-                               const Config &cfg, const std::string &dest,
-                               std::string &cmd, std::string &archiveCmd)
-  {
-    std::stringstream cmdss, archiveCmdss;
-    cmdss << "g++ " << "-I. -I" << topInclude() << " " << cfg.cflags()
-          << " -L" << topLib() << " " << cfg.ldflags(); 
-    for(auto &source : sources) {
-      cmdss << " " << source;
-    }
-    if(cfg.target() == "a") {
-      cmdss << " -c";
-      archiveCmdss << "ar -q " << dest << getTargetName(cfg) << " *.o; rm -f *.o";
-    } else {
-      if(cfg.target() == "so") {
-        cmdss << " -shared";
-      }        
-      cmdss << " -o " << dest << getTargetName(cfg);
-    } 
-    for(auto &lib : builtLibs_) {
-      cmdss << " " << lib;
-    }
-    cmd = cmdss.str();
-    archiveCmd = archiveCmdss.str();
-  }
-
-  static time_t getFileModTime(const std::string &path) {
-    struct stat statbuf;
-    if(stat(path.c_str(), &statbuf) != 0) {
-      return 0;
-    }
-    return statbuf.st_mtimespec.tv_sec;
-  }
-
-  static time_t getNewestSourceModTime(const std::vector<std::string> &sources) {
-    time_t newest = 0;
-    std::vector<std::string>::const_iterator source;
-    for(source = sources.begin(); source != sources.end(); ++source) {
-      time_t modTime = getFileModTime(*source);
-      if(modTime == 0) {
-        return 0;
-      } else if(modTime > newest) {
-        newest = modTime;
-      }
-    }
-    return newest;
-  }
-
-  static void checkFilesUpToDate(const std::string &dest, const Config &cfg,
-                                 std::vector<std::string> &sources) {
-    time_t sourceModTime = getNewestSourceModTime(sources);
-    time_t targetModTime = getFileModTime(dest+getTargetName(cfg));
-    if(sourceModTime < targetModTime) {
-      sources.clear();
-    }
-  }
+  }; 
 
   static bool linkFiles(const Config &cfg, 
                         const std::string &dir,
@@ -141,33 +73,27 @@ namespace Cast {
     }
     return ret; 
   }
-
+ 
   static bool buildCwd(const Config &cfg, 
                        const std::string &dir,
                        const std::string &dest) {
+
     std::vector<std::string> exts = {".cpp", ".c", ".cc"};
     std::vector<std::string> sources = Util::getFiles(".", exts);
     if(sources.empty()) {
       return true;
     }
-    checkFilesUpToDate(dest, cfg, sources);
-    if(sources.empty()) {
-      std::cout << "cast: Target (" << getTargetName(cfg) << ") up to date" << std::endl;
-      return true;
-    }
-    Util::mkdirp(dest);
-    std::string cmd, archiveCmd;
-    buildCompileCmds(sources, cfg, dest, cmd, archiveCmd); 
-    if(!Util::run(cmd) || (!archiveCmd.empty() && !Util::run(archiveCmd))) {
+    Compiler compiler(topInclude(), topLib(), builtLibs_);
+    if(!compiler.compile(cfg, dest, sources)) {
       return false;
     }
     if(cfg.target() == "so" || cfg.target() == "a") {
       std::string libPath = std::string(getcwd(NULL, 0)) + "/" + 
-                            dest + getTargetName(cfg);
+                            dest + cfg.getTargetName();
       builtLibs_.insert(libPath);
     }
     return dir == "test" ? true : linkFiles(cfg, dir, dest);
-  } 
+  }
 
   static bool check(const std::string &name,
                     const std::string &dir) {
@@ -200,8 +126,8 @@ namespace Cast {
     if (!buildCwd(cfg, dir, dest)) {
       ret = 1;
     }
-    if (runTests_) {
-      if(Util::exists("test") && !::Cast::check(cfg.name(), "test")) {
+    if (runTests_ && Util::exists("test")) {
+      if(!::Cast::check(cfg.name(), "test")) {
         ret = 1;
       }
     }

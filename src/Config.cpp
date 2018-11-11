@@ -68,4 +68,14 @@ namespace Cast {
     return cfg_.at("name");
   }
 
+  std::string Config::getTargetName() const {
+    std::string targetName = name();
+    if(target() == "so") {
+      targetName += ".so";
+    } else if(target() == "a") {
+      targetName += ".a";
+    }
+    return targetName;
+  }
+
 }

@@ -27,6 +27,8 @@ namespace Cast {
     
       const std::string &name() const;
 
+      std::string getTargetName() const;
+
     protected:
       std::map<std::string, std::string> cfg_;
       std::vector<std::string> subdirs_;
