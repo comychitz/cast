@@ -35,39 +35,16 @@ static bool targetUpToDate(const std::string &dest, const Config &cfg,
   return sourceModTime < targetModTime;
 }
 
-static void buildCompileCmds(const std::vector<std::string> &sources,
-                             const Config &cfg, const std::string &dest,
-                             const std::set<std::string> &builtLibs,
-                             const std::string &topInclude,
-                             const std::string &topLib,
-                             std::string &cmd, std::string &archiveCmd)
-{
-  std::stringstream cmdss, archiveCmdss;
-  cmdss << "g++ " << "-I. -I" << topInclude << " " << cfg.cflags()
-    << " -L" << topLib << " " << cfg.ldflags(); 
-  for(auto &source : sources) {
-    cmdss << " " << source;
-  }
-  if(cfg.target() == "a") {
-    cmdss << " -c";
-    archiveCmdss << "ar -q " << dest << cfg.getTargetName() << " *.o; rm -f *.o";
-  } else {
-    if(cfg.target() == "so") {
-      cmdss << " -shared";
-    }        
-    cmdss << " -o " << dest << cfg.getTargetName();
-  } 
-  for(auto &lib : builtLibs) {
-    cmdss << " " << lib;
-  }
-  cmd = cmdss.str();
-  archiveCmd = archiveCmdss.str();
+static bool createStaticArchive(const std::string &dest, const Config &cfg) {
+  std::stringstream cmd;
+  cmd << "ar -q " << dest << cfg.getTargetName() << " *.o; rm -f *.o";
+  return Util::run(cmd.str());
 }
 
 Compiler::Compiler(const std::string &topInclude,
                    const std::string &topLib,
-                   const std::set<std::string> &builtLibs) 
-  : topInclude_(topInclude), topLib_(topLib), builtLibs_(builtLibs) {
+                   const DependencyManager &depMgr)
+  : topInclude_(topInclude), topLib_(topLib), depMgr_(depMgr) {
 }
 
 Compiler::~Compiler() {
@@ -80,13 +57,38 @@ bool Compiler::compile(const Config &cfg, const std::string &dest,
     return true;
   }
   Util::mkdirp(dest);
-  std::string cmd, archiveCmd;
-  buildCompileCmds(sources, cfg, dest, builtLibs_, topInclude_, topLib_, cmd, archiveCmd); 
-  bool ret = Util::run(cmd); 
-  if(ret && !archiveCmd.empty()) {
-    return Util::run(archiveCmd);
+  if(!compileSources_(sources, cfg, dest, depMgr_, topInclude_, topLib_)) {
+    return false;
   }
-  return ret;
+  if(cfg.target() == "a") {
+    return createStaticArchive(dest, cfg);
+  }
+  return true;
+}
+
+bool Compiler::compileSources_(const std::vector<std::string> &sources,
+                               const Config &cfg, 
+                               const std::string &dest) {
+  std::stringstream cmd;
+  cmd << "g++ " << "-I. -I" << topInclude_ << " " << cfg.cflags()
+      << " -L" << topLib_ << " " << cfg.ldflags(); 
+  std::set<std::string> depLibs;
+  for(auto &source : sources) {
+    cmd << " " << source;
+    depMgr_.determineDepLibs(source, depLibs);
+  }
+  if(cfg.target() == "a") {
+    cmd << " -c";
+  } else {
+    if(cfg.target() == "so") {
+      cmd << " -shared";
+    }        
+    cmd << " -o " << dest << cfg.getTargetName();
+  } 
+  for(auto &lib : depLibs) {
+    cmd << " " << lib;
+  }
+  return Util::run(cmd.str());
 }
 
 }

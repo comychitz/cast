@@ -10,7 +10,6 @@ namespace Cast {
 
   static std::string top_;
   static bool runTests_ = false;
-  static std::set<std::string> builtLibs_;
 
   static std::string topBuild() {
     return top_ + "/build";
@@ -77,20 +76,22 @@ namespace Cast {
   static bool buildCwd(const Config &cfg, 
                        const std::string &dir,
                        const std::string &dest) {
-
     std::vector<std::string> exts = {".cpp", ".c", ".cc"};
     std::vector<std::string> sources = Util::getFiles(".", exts);
     if(sources.empty()) {
       return true;
     }
-    Compiler compiler(topInclude(), topLib(), builtLibs_);
+    Compiler compiler(topInclude(), topLib(), depMgr_);
     if(!compiler.compile(cfg, dest, sources)) {
       return false;
     }
     if(cfg.target() == "so" || cfg.target() == "a") {
       std::string libPath = std::string(getcwd(NULL, 0)) + "/" + 
                             dest + cfg.getTargetName();
-      builtLibs_.insert(libPath);
+      //
+      // TODO need to add built library to dep mgr
+      // builtLibs_.insert(libPath);
+      //
     }
     return dir == "test" ? true : linkFiles(cfg, dir, dest);
   }
@@ -159,7 +160,7 @@ namespace Cast {
   }
 
   int Caster::build() {
-    builtLibs_.clear();
+    depMgr_.clear();
     DirectoryScope dirScope(top_); 
     setupTopBuild();
     return ::Cast::build("src");
