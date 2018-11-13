@@ -7,7 +7,7 @@
 
 namespace Cast {
 
-class DepenedencyManager {
+class DependencyManager {
   public:
     DependencyManager();
 
@@ -22,7 +22,7 @@ class DepenedencyManager {
                           std::set<std::string> &libs) const;
 
   private:
-    std::map<std::string, std::set<std::string> deps_;
+    std::map<std::string, std::set<std::string> > deps_;
 };
 
 }
