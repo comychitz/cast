@@ -73,7 +73,8 @@ namespace Cast {
     return ret; 
   }
  
-  static bool buildCwd(const Config &cfg, 
+  static bool buildCwd(DependencyManager &depMgr,
+                       const Config &cfg, 
                        const std::string &dir,
                        const std::string &dest) {
     std::vector<std::string> exts = {".cpp", ".c", ".cc"};
@@ -81,7 +82,7 @@ namespace Cast {
     if(sources.empty()) {
       return true;
     }
-    Compiler compiler(topInclude(), topLib(), depMgr_);
+    Compiler compiler(topInclude(), topLib(), depMgr);
     if(!compiler.compile(cfg, dest, sources)) {
       return false;
     }
@@ -96,20 +97,21 @@ namespace Cast {
     return dir == "test" ? true : linkFiles(cfg, dir, dest);
   }
 
-  static bool check(const std::string &name,
+  static bool check(DependencyManager &depMgr,
+                    const std::string &name,
                     const std::string &dir) {
     bool ret = false;
     DirectoryScope dirScope(dir);
     const std::string &testName = name+"Test", &dest = "../.build/";
     Config testCfg(testName);
     testCfg.cflags("-std=c++14");
-    if(buildCwd(testCfg, dir, dest)) {
+    if(buildCwd(depMgr, testCfg, dir, dest)) {
       ret = Util::run(dest+testName);
     }
     return ret;
   } 
 
-  static int build(const std::string &dir) {
+  static int build(DependencyManager &depMgr, const std::string &dir) {
     std::cout << "cast: Entering directory [" << getcwd(NULL, 0) << "/" << dir
               << "]" << std::endl;
     DirectoryScope dirScope(dir);
@@ -119,16 +121,16 @@ namespace Cast {
       cfg.read("cast.cfg");
     }
     for(auto &dir : cfg.subdirs()) {
-      if(build(dir) != 0) {
+      if(build(depMgr, dir) != 0) {
         ret = 1;
       }
     }
     const std::string &dest = ".build/";
-    if (!buildCwd(cfg, dir, dest)) {
+    if (!buildCwd(depMgr, cfg, dir, dest)) {
       ret = 1;
     }
     if (runTests_ && Util::exists("test")) {
-      if(!::Cast::check(cfg.name(), "test")) {
+      if(!::Cast::check(depMgr, cfg.name(), "test")) {
         ret = 1;
       }
     }
@@ -163,7 +165,7 @@ namespace Cast {
     depMgr_.clear();
     DirectoryScope dirScope(top_); 
     setupTopBuild();
-    return ::Cast::build("src");
+    return ::Cast::build(depMgr_, "src");
   } 
 
   int Caster::clean() {

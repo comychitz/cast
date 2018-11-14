@@ -14,7 +14,7 @@ void DependencyManager::clear() {
 
 void DependencyManager::addLib(const std::string &libName,
                                const std::vector<std::string> &headers) {
-  deps[libName].insert(headers.begin(), headers.end()); 
+  deps_[libName].insert(headers.begin(), headers.end()); 
 }
 
 void DependencyManager::determineDepLibs(const std::string &sourceFile,

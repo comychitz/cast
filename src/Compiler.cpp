@@ -57,7 +57,7 @@ bool Compiler::compile(const Config &cfg, const std::string &dest,
     return true;
   }
   Util::mkdirp(dest);
-  if(!compileSources_(sources, cfg, dest, depMgr_, topInclude_, topLib_)) {
+  if(!compileSources_(sources, cfg, dest)) {
     return false;
   }
   if(cfg.target() == "a") {

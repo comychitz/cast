@@ -2,6 +2,7 @@
 #define _CASTER_H_
 
 #include "Config.h"
+#include "DependencyManager.h"
 
 namespace Cast {
 
@@ -16,6 +17,9 @@ namespace Cast {
       int clean();
 
       int check();
+
+    private:
+      DependencyManager depMgr_;
   };
 }
 
