@@ -89,10 +89,9 @@ namespace Cast {
     if(cfg.target() == "so" || cfg.target() == "a") {
       std::string libPath = std::string(getcwd(NULL, 0)) + "/" + 
                             dest + cfg.getTargetName();
-      //
-      // TODO need to add built library to dep mgr
-      // builtLibs_.insert(libPath);
-      //
+      std::vector<std::string> exts = {".h", ".hpp"};
+      std::vector<std::string> headers = Util::getFiles(".", exts);
+      depMgr.addLib(libPath, headers);
     }
     return dir == "test" ? true : linkFiles(cfg, dir, dest);
   }
