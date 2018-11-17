@@ -24,6 +24,7 @@ class DependencyManager {
 
   private:
     std::map<std::string, std::set<std::string> > deps_;
+    std::set<std::string> headers_;
 };
 
 }
