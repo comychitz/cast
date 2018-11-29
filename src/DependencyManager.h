@@ -23,8 +23,8 @@ class DependencyManager {
                           std::set<std::string> &libs) const;
 
   private:
-    std::map<std::string, std::set<std::string> > deps_;
-    std::set<std::string> headers_;
+    /// map of headers to libraries
+    std::map<std::string, std::string> deps_;
 };
 
 }
