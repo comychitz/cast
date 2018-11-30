@@ -4,17 +4,10 @@
 
 namespace Cast {
 
-  Config::Config(const std::string &dir) {
-    cfg_["name"] = dir;
-    cfg_["target"] = "exe";
-    cfg_["cflags"] = "";
-    cfg_["ldflags"] = "";
+  ConfigInterface::~ConfigInterface() {
   }
 
-  Config::~Config() { 
-  }
-
-  void Config::read(const std::string &cfg) {
+  void ConfigInterface::read(const std::string &cfg) {
     // future todo, make more user friendly
     std::ifstream f(cfg.c_str());
     if(!f.is_open()) {
@@ -43,6 +36,16 @@ namespace Cast {
     }
     f.close();
   }
+
+  Config::Config(const std::string &dir) {
+    cfg_["name"] = dir;
+    cfg_["target"] = "exe";
+    cfg_["cflags"] = "";
+    cfg_["ldflags"] = "";
+  }
+
+  Config::~Config() { 
+  } 
 
   const std::string &Config::target() const {
     return cfg_.at("target");
@@ -76,6 +79,16 @@ namespace Cast {
       targetName += ".a";
     }
     return targetName;
+  }
+
+  DepConfig::DepConfig() {
+  }
+
+  DepConfig::~DepConfig() {
+  }
+
+  const std::map<std::string, std::string> &DepConfig::getConfig() const {
+    return cfg_;
   }
 
 }

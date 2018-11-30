@@ -7,13 +7,22 @@
 
 namespace Cast {
 
-  class Config {
+  class ConfigInterface {
+    public:
+      virtual ~ConfigInterface();
+
+      virtual void read(const std::string &cfg);
+
+    protected:
+      std::map<std::string, std::string> cfg_;
+      std::vector<std::string> subdirs_;
+  };
+
+  class Config : public ConfigInterface {
     public:
       Config(const std::string &dir);
 
       virtual ~Config();
-
-      void read(const std::string &cfg);
 
       const std::string &target() const;
 
@@ -28,10 +37,15 @@ namespace Cast {
       const std::string &name() const;
 
       std::string getTargetName() const;
+  };
 
-    protected:
-      std::map<std::string, std::string> cfg_;
-      std::vector<std::string> subdirs_;
+  class DepConfig : public ConfigInterface {
+    public:
+      DepConfig();
+
+      virtual ~DepConfig();
+
+      const std::map<std::string, std::string> &getConfig() const;
   };
 
 }

@@ -1,5 +1,6 @@
 #include "DependencyManager.h"
 #include "Util.h"
+#include "Config.h"
 #include <iostream>
 #include <fstream>
 #include <errno.h>
@@ -7,7 +8,18 @@
 
 namespace Cast {
 
-DependencyManager::DependencyManager() {
+static void readDefaultCfg(std::map<std::string, std::string> &deps) {
+  std::string defaultDepCfg = "/usr/local/share/cast/dep.cfg";
+  DepConfig cfg;
+  cfg.read(defaultDepCfg);
+  const std::map<std::string, std::string> &cfgItems = cfg.getConfig();
+  for(auto &cfgItem : cfgItems) {
+    deps[cfgItem.first] = cfgItem.second;
+  }
+}
+
+DependencyManager::DependencyManager() { 
+  readDefaultCfg(deps_);
 }
 
 DependencyManager::~DependencyManager() {
@@ -15,6 +27,7 @@ DependencyManager::~DependencyManager() {
 
 void DependencyManager::clear() {
   deps_.clear();
+  readDefaultCfg(deps_);
 }
 
 void DependencyManager::addLib(const std::string &libName,
