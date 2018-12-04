@@ -1,5 +1,6 @@
 from conans.model import Generator
 from conans import ConanFile
+import os
 
 """
 The Cast generator supports integrating Cast with Conan for external dependency
@@ -27,9 +28,18 @@ class CastGenerator(Generator):
     def content(self):
         contents = {}
 
-        #
-        # TODO implement me
-        #
+        for depname, cpp_info in self.deps_build_info.dependencies:
+            if depname == CAST_GENERATOR_NAME or depname == CAST_TOOL_NAME:
+                continue;
+
+            includes = []
+            for include in cpp_info.includedirs:
+                includes.extend(os.listdir(cpp_info.rootpath+"/"+include))
+
+            depContents = []
+            # TODO add all libs to link against for each header file
+
+            contents["%s.cfg" % depname] = depContents
 
         return contents;
 
