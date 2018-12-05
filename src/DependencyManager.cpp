@@ -16,6 +16,9 @@ static void readDefaultCfg(std::map<std::string, std::string> &deps) {
   for(auto &cfgItem : cfgItems) {
     deps[cfgItem.first] = cfgItem.second;
   }
+  //
+  // TODO parse all dep config files in the build/deps dir
+  //
 }
 
 DependencyManager::DependencyManager() { 

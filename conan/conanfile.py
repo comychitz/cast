@@ -9,10 +9,12 @@ projects using Cast as its build system.
 
 The format for cast dependency config files is a simple line-separated file of
 key, value pairs separated by a colon (:). The key is the header file relative
-path and the value is the path to the library installed on the machine.
+path and the value is the path to the library installed on the machine. If a
+library depends on other libraries, the keyword "depLib" is used to indicate.
 
 An example dependency config file may contain:
 curl/curl.h:/home/user/.conan/data/curl/7.48.0/conan/stable/package/58ab6a9db77483d191a9b9008621529feb6c1ead/lib/libcurl.a
+depLib:/home/user/.conan/data/zlib/1.2.3/conan/stable/package/23234ksdf0923rlkjsdf2389u234lkjef9234jlk/lib/libzlib.a
 """
 
 CAST_GENERATOR_NAME = "CastGenerator"
@@ -27,20 +29,16 @@ class CastGenerator(Generator):
     @property
     def content(self):
         contents = {}
-
         for depname, cpp_info in self.deps_build_info.dependencies:
             if depname == CAST_GENERATOR_NAME or depname == CAST_TOOL_NAME:
                 continue;
-
             includes = []
             for include in cpp_info.includedirs:
                 includes.extend(os.listdir(cpp_info.rootpath+"/"+include))
-
             depContents = []
             # TODO add all libs to link against for each header file
 
             contents["%s.cfg" % depname] = depContents
-
         return contents;
 
 
