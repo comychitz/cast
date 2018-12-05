@@ -5,7 +5,7 @@ A simple and lightweight C/C++ build system with minimal user configuration.
 * Minimal user configuration
 * Built-in unit testing support
 * Incremental Builds
-* (TODO) Integrates with [Conan](https://github.com/conan-io/conan) for handling external dependencies
+* Integrates with [Conan](https://github.com/conan-io/conan) for handling external dependencies
 
 ## Upcoming Features
 * Support for cross compilation
@@ -34,7 +34,7 @@ dynamic). Folders named `test` are targeted for unit tests.
 Folder names are used for naming the libraries and executables by default
 (libraries prefixed with lib).
 
-See example projects: [example #1](), [example #2](), [example #3]()
+*See example projects [here](https://github.com/comychitz/cast/examples)*
 
 ### cast.cfg
 A simple library configuration can contain the following:
