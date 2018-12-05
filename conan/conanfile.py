@@ -1,6 +1,6 @@
 from conans.model import Generator
 from conans import ConanFile
-import os
+from os import walk
 
 """
 The Cast generator supports integrating Cast with Conan for external dependency
@@ -33,14 +33,26 @@ class CastGenerator(Generator):
             if depname == CAST_GENERATOR_NAME or depname == CAST_TOOL_NAME:
                 continue;
             includes = []
-            for include in cpp_info.includedirs:
-                # TODO need to walk entire dir tree
-                includes.extend(os.listdir(cpp_info.rootpath+"/"+include))
+            for includeDir in cpp_info.includedirs:
+                includePath = cpp_info.rootpath+"/"+includeDir
+                for root, dirs, files = walk(includePath):
+                    relativePath = root+"/"+files
+                    relativePath.replace(includePath+"/", "")
+                    includes.extend(relativePath)
+
+            libs = []
+            for libDir in cpp_info.libdirs:
+                for root, dirs, files = walk(cpp_info.rootpath+"/"+libDir):
+                    for f in files:
+                        libs.extend(root+"/"+f)
 
             depContents = []
-            # TODO write lines of include files to 
+            for include in includes:
+                for lib in libs:
+                    depContents.extend(include+":"+lib)
 
-            # TODO write depLib lines using list in: cpp_info.public_deps:
+            for public_dep in cpp_info.public_deps:
+                depContents.extend("depLib:"+public_dep)
 
             contents["%s.cfg" % depname] = depContents
         return contents;
