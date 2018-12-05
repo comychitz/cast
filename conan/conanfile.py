@@ -34,9 +34,13 @@ class CastGenerator(Generator):
                 continue;
             includes = []
             for include in cpp_info.includedirs:
+                # TODO need to walk entire dir tree
                 includes.extend(os.listdir(cpp_info.rootpath+"/"+include))
+
             depContents = []
-            # TODO add all libs to link against for each header file
+            # TODO write lines of include files to 
+
+            # TODO write depLib lines using list in: cpp_info.public_deps:
 
             contents["%s.cfg" % depname] = depContents
         return contents;
