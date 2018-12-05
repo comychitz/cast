@@ -5,7 +5,7 @@ from os import walk
 """
 The Cast generator supports integrating Cast with Conan for external dependency
 management. This generator will create dependency config files for source code
-projects using Cast as its build system. 
+projects using Cast as its build system.
 
 The format for cast dependency config files is a simple line-separated file of
 key, value pairs separated by a colon (:). The key is the header file relative
@@ -20,6 +20,7 @@ depLib:/home/user/.conan/data/zlib/1.2.3/conan/stable/package/23234ksdf0923rlkjs
 CAST_GENERATOR_NAME = "CastGenerator"
 CAST_TOOL_NAME = "Cast"
 
+
 class CastGenerator(Generator):
 
     @property
@@ -31,36 +32,38 @@ class CastGenerator(Generator):
         contents = {}
         for depname, cpp_info in self.deps_build_info.dependencies:
             if depname == CAST_GENERATOR_NAME or depname == CAST_TOOL_NAME:
-                continue;
+                continue
+
             includes = []
             for includeDir in cpp_info.includedirs:
                 includePath = cpp_info.rootpath+"/"+includeDir
-                for root, dirs, files = walk(includePath):
-                    relativePath = root+"/"+files
-                    relativePath.replace(includePath+"/", "")
-                    includes.extend(relativePath)
+                for root, dirs, files in walk(includePath):
+                    for f in files:
+                        relativePath = root+"/"+f
+                        relativePath = relativePath.replace(includePath+"/", "")
+                        includes.append(relativePath)
 
             libs = []
             for libDir in cpp_info.libdirs:
-                for root, dirs, files = walk(cpp_info.rootpath+"/"+libDir):
+                for root, dirs, files in walk(cpp_info.rootpath+"/"+libDir):
                     for f in files:
-                        libs.extend(root+"/"+f)
+                        libs.append(root+"/"+f)
 
-            depContents = []
+            depContents = ""
             for include in includes:
                 for lib in libs:
-                    depContents.extend(include+":"+lib)
+                    depContents += (include+":"+lib)+"\n"
 
             for public_dep in cpp_info.public_deps:
-                depContents.extend("depLib:"+public_dep)
+                depContents += "depLib:"+public_dep+"\n"
 
             contents["%s.cfg" % depname] = depContents
-        return contents;
+        return contents
 
 
 class CastGeneratorPackage(ConanFile):
     name = CAST_GENERATOR_NAME
-    version = 01.00.00
+    version = "01.00.00"
     url = "https://github.com/comychitz/cast"
     license = "MIT"
     description = "Cast Generator"
@@ -72,4 +75,3 @@ class CastGeneratorPackage(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.bindirs = []
-
