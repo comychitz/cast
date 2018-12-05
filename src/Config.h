@@ -13,9 +13,8 @@ namespace Cast {
 
       virtual void read(const std::string &cfg);
 
-    protected:
-      std::map<std::string, std::string> cfg_;
-      std::vector<std::string> subdirs_;
+      virtual void processKeyValue(const std::string &key,
+                                   const std::string &value) = 0;
   };
 
   class Config : public ConfigInterface {
@@ -23,6 +22,8 @@ namespace Cast {
       Config(const std::string &dir);
 
       virtual ~Config();
+
+      void processKeyValue(const std::string &key, const std::string &value);
 
       const std::string &target() const;
 
@@ -37,6 +38,10 @@ namespace Cast {
       const std::string &name() const;
 
       std::string getTargetName() const;
+
+    private:
+      std::vector<std::string> subdirs_;
+      std::map<std::string, std::string> cfg_;
   };
 
   class DepConfig : public ConfigInterface {
@@ -45,7 +50,13 @@ namespace Cast {
 
       virtual ~DepConfig();
 
+      void processKeyValue(const std::string &key, const std::string &value);
+
       const std::map<std::string, std::string> &getConfig() const;
+
+    private:
+      std::vector<std::string> deps_;
+      std::map<std::string, std::string> cfg_;
   };
 
 }
