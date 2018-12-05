@@ -25,6 +25,9 @@ class DependencyManager {
   private:
     /// map of headers to libraries
     std::map<std::string, std::string> deps_;
+
+    /// map of libraries to dependent libraries
+    std::map<std::string, std::set<std::string> > depDeps_;
 };
 
 }
