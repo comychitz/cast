@@ -34,7 +34,7 @@ dynamic). Folders named `test` are targeted for unit tests.
 Folder names are used for naming the libraries and executables by default
 (libraries prefixed with lib).
 
-*See example projects [here](https://github.com/comychitz/cast/examples)*
+*See example projects [here](https://github.com/comychitz/cast/tree/master/examples)*
 
 ### cast.cfg
 A simple library configuration can contain the following:
