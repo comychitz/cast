@@ -8,21 +8,12 @@
 
 namespace Cast {
 
-static void readDefaultCfg(std::map<std::string, std::string> &deps) {
-  std::string defaultDepCfg = "/usr/local/share/cast/dep.cfg";
-  DepConfig cfg;
-  cfg.read(defaultDepCfg);
-  const std::map<std::string, std::string> &cfgItems = cfg.getConfig();
-  for(auto &cfgItem : cfgItems) {
-    deps[cfgItem.first] = cfgItem.second;
-  }
-  //
-  // TODO parse all dep config files in the build/deps dir
-  //
+static void readDefaultCfg(std::map<std::string, std::string> &deps) { 
 }
 
 DependencyManager::DependencyManager() { 
-  readDefaultCfg(deps_);
+  const std::string defaultDepCfg = "/usr/local/share/cast/dep.cfg";
+  readCfgFile(defaultDepCfg, "");
 }
 
 DependencyManager::~DependencyManager() {
@@ -94,6 +85,33 @@ void DependencyManager::determineDepLibs(const std::string &sourceFile,
     } else if(Util::exists(header)) {
       determineDepLibs(header, libs); 
     }
+  }
+
+  //
+  // TODO need to implement resolving a dependency's dependencies
+  //
+  
+}
+
+void DependencyManager::readCfgFile(const std::string &file,
+                                    const std::string &depName) {
+  DepConfig cfg;
+  cfg.read(file);
+  const std::map<std::string, std::string> &cfgItems = cfg.getConfig();
+  for(auto &cfgItem : cfgItems) {
+    deps_[cfgItem.first] = cfgItem.second;
+  }
+  for(auto &depDep : cfg.getDeps()) {
+    depDeps_[depName].insert(depDep);
+  }
+}
+
+void DependencyManager::readCfgDir(const std::string &dir) {
+  std::vector<std::string> filter = {".cfg"};
+  std::vector<std::string> depCfgs = Util::getFiles(dir, filter);
+  for(auto &cfg : depCfgs) {
+    const std::string &depName = cfg.substr(0, cfg.find("."));
+    readCfgFile(dir+"/"+cfg, depName);
   }
 }
 

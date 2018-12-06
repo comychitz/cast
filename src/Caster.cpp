@@ -27,10 +27,15 @@ namespace Cast {
     return topBuild() + "/bin";
   }
 
+  static std::string depCfgDir() {
+    return topBuild() + "/deps";
+  }
+
   static void setupTopBuild() {
     Util::mkdirp(topBin());
     Util::mkdirp(topInclude());
     Util::mkdirp(topLib());
+    Util::mkdirp(depCfgDir());
   }
 
   class DirectoryScope {
@@ -153,6 +158,14 @@ namespace Cast {
     return ret;
   }
 
+  static void downloadDependencies() {
+    const std::string &cwd = getcwd(NULL, 0);
+    if(Util::exists("./conanfile.txt")) {
+      DirectoryScope dirScope(depCfgDir());
+      Util::run("conan install " + cwd + "/conanfile.txt"); 
+    }
+  }
+
   Caster::Caster(const std::string &topDirPath) { 
     top_ = topDirPath;
   }
@@ -164,6 +177,8 @@ namespace Cast {
     depMgr_.clear();
     DirectoryScope dirScope(top_); 
     setupTopBuild();
+    downloadDependencies();
+    depMgr_.readCfgDir(depCfgDir());
     return ::Cast::build(depMgr_, "src");
   } 
 

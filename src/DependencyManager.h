@@ -22,7 +22,12 @@ class DependencyManager {
     void determineDepLibs(const std::string &sourceFile,
                           std::set<std::string> &libs) const;
 
+    void readCfgDir(const std::string &dir);
+
   private:
+    void readCfgFile(const std::string &file,
+                     const std::string &depName);
+
     /// map of headers to libraries
     std::map<std::string, std::string> deps_;
 

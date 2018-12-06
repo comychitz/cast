@@ -54,6 +54,8 @@ namespace Cast {
 
       const std::map<std::string, std::string> &getConfig() const;
 
+      const std::vector<std::string> &getDeps() const;
+
     private:
       std::vector<std::string> deps_;
       std::map<std::string, std::string> cfg_;

@@ -108,4 +108,8 @@ namespace Cast {
     return cfg_;
   }
 
+  const std::vector<std::string> &DepConfig::getDeps() const {
+    return deps_;
+  }
+
 }
