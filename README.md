@@ -34,6 +34,10 @@ dynamic). Folders named `test` are targeted for unit tests.
 Folder names are used for naming the libraries and executables by default
 (libraries prefixed with lib).
 
+Include a `conanfile.txt` file at the top level of your directory and cast will
+handle installing and linking against the dependencies for you. *Note: this
+requires the CastGenerator package to be available.*
+
 *See example projects [here](https://github.com/comychitz/cast/tree/master/examples)*
 
 ### cast.cfg
@@ -85,3 +89,10 @@ install cast:
 ```
 $ make install
 ```
+
+### building the Conan generator
+Build and install the Conan generator package using the following:
+```
+$ cd conan && conan create . <user>/<channel>
+```
+*Specify the appropriate user and channel values*
