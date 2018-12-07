@@ -34,28 +34,22 @@ class CastGenerator(Generator):
             if depname == CAST_GENERATOR_NAME or depname == CAST_TOOL_NAME:
                 continue
 
-            includes = []
+            depContents = ""
             for includeDir in cpp_info.includedirs:
                 includePath = cpp_info.rootpath+"/"+includeDir
                 for root, dirs, files in walk(includePath):
                     for f in files:
                         relativePath = root+"/"+f
                         relativePath = relativePath.replace(includePath+"/", "")
-                        includes.append(relativePath)
+                        depContents += ("header:"+relativePath)+"\n"
 
-            libs = []
             for libDir in cpp_info.libdirs:
                 for root, dirs, files in walk(cpp_info.rootpath+"/"+libDir):
                     for f in files:
-                        libs.append(root+"/"+f)
-
-            depContents = ""
-            for include in includes:
-                for lib in libs:
-                    depContents += (include+":"+lib)+"\n"
+                        depContents += ("lib:"+root+"/"+f)+"\n"
 
             for public_dep in cpp_info.public_deps:
-                depContents += "depLib:"+public_dep+"\n"
+                depContents += "dep:"+public_dep+"\n"
 
             contents["%s.cfg" % depname] = depContents
         return contents

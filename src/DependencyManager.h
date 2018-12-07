@@ -1,10 +1,7 @@
 #ifndef _DEPENDENCY_MANAGER_H_ 
 #define _DEPENDENCY_MANAGER_H_ 
 
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
+#include "Config.h"
 
 namespace Cast {
 
@@ -28,11 +25,8 @@ class DependencyManager {
     void readCfgFile(const std::string &file,
                      const std::string &depName);
 
-    /// map of headers to libraries
-    std::map<std::string, std::string> deps_;
-
-    /// map of libraries to dependent libraries
-    std::map<std::string, std::set<std::string> > depDeps_;
+    /// map of dep name to dep config
+    std::map<std::string, DepConfig> deps_;
 };
 
 }

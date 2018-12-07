@@ -89,7 +89,7 @@ namespace Cast {
     return targetName;
   }
 
-  DepConfig::DepConfig() {
+  DepConfig::DepConfig(const std::string &n) : name(n) {
   }
 
   DepConfig::~DepConfig() {
@@ -97,19 +97,13 @@ namespace Cast {
 
   void DepConfig::processKeyValue(const std::string &key,
                                   const std::string &value) {
-    if(key == "depLib") {
-      deps_.push_back(value);
-    } else {
-      cfg_[key] = value;
+    if(key == "dep") {
+      deps.insert(value);
+    } else if(key == "header") {
+      headers.insert(value);
+    } else if(key == "lib") {
+      libs.insert(value);
     }
-  }
-
-  const std::map<std::string, std::string> &DepConfig::getConfig() const {
-    return cfg_;
-  }
-
-  const std::vector<std::string> &DepConfig::getDeps() const {
-    return deps_;
   }
 
 }

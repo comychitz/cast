@@ -1,6 +1,7 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+#include <set>
 #include <map>
 #include <vector>
 #include <string>
@@ -46,19 +47,14 @@ namespace Cast {
 
   class DepConfig : public ConfigInterface {
     public:
-      DepConfig();
+      explicit DepConfig(const std::string &name);
 
       virtual ~DepConfig();
 
       void processKeyValue(const std::string &key, const std::string &value);
 
-      const std::map<std::string, std::string> &getConfig() const;
-
-      const std::vector<std::string> &getDeps() const;
-
-    private:
-      std::vector<std::string> deps_;
-      std::map<std::string, std::string> cfg_;
+      std::string name;
+      std::set<std::string> headers, libs, deps;
   };
 
 }

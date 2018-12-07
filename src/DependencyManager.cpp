@@ -8,12 +8,9 @@
 
 namespace Cast {
 
-static void readDefaultCfg(std::map<std::string, std::string> &deps) { 
-}
-
 DependencyManager::DependencyManager() { 
-  const std::string defaultDepCfg = "/usr/local/share/cast/dep.cfg";
-  readCfgFile(defaultDepCfg, "");
+  const std::string defaultDepCfgDir = "/usr/local/share/cast/deps";
+  readCfgDir(defaultDepCfgDir);
 }
 
 DependencyManager::~DependencyManager() {
@@ -21,13 +18,15 @@ DependencyManager::~DependencyManager() {
 
 void DependencyManager::clear() {
   deps_.clear();
-  readDefaultCfg(deps_);
 }
 
 void DependencyManager::addLib(const std::string &libName,
                                const std::vector<std::string> &headers) {
   for(auto &header : headers) {
-    deps_[header] = libName;
+    DepConfig dep(Util::basename(libName));
+    dep.libs.insert(libName);
+    dep.headers.insert(headers.begin(), headers.end());
+    deps_.emplace(libName, dep);
   }
 }
 
@@ -75,34 +74,22 @@ void DependencyManager::determineDepLibs(const std::string &sourceFile,
   parseIncludedHeaders(sourceFile, headers);
   
   for(auto &header : headers) {
-    std::map<std::string,std::string>::const_iterator dep;
-    if((dep = deps_.find(header)) != deps_.end()) {
-      libs.insert(dep->second);
-      std::map<std::string,std::set<std::string> >::const_iterator depDep;
-      if((depDep = depDeps_.find(dep->second)) != depDeps_.end()) {
-        libs.insert(depDep->second.begin(), depDep->second.end());
+    for(auto &dep : deps_) {
+      if(dep.second.headers.find(header) != dep.second.headers.end()) {
+        libs.insert(dep.second.libs.begin(), dep.second.libs.end());
+        for(auto &depDep : dep.second.deps) {
+          auto depLibs = deps_.find(depDep);
+          if(depLibs != deps_.end()) {
+            libs.insert(depLibs->second.libs.begin(),
+                        depLibs->second.libs.end());
+          }
+        }
+        break;
       }
-    } else if(Util::exists(header)) {
+    }
+    if(Util::exists(header)) {
       determineDepLibs(header, libs); 
     }
-  }
-
-  //
-  // TODO need to implement resolving a dependency's dependencies
-  //
-  
-}
-
-void DependencyManager::readCfgFile(const std::string &file,
-                                    const std::string &depName) {
-  DepConfig cfg;
-  cfg.read(file);
-  const std::map<std::string, std::string> &cfgItems = cfg.getConfig();
-  for(auto &cfgItem : cfgItems) {
-    deps_[cfgItem.first] = cfgItem.second;
-  }
-  for(auto &depDep : cfg.getDeps()) {
-    depDeps_[depName].insert(depDep);
   }
 }
 
@@ -110,8 +97,9 @@ void DependencyManager::readCfgDir(const std::string &dir) {
   std::vector<std::string> filter = {".cfg"};
   std::vector<std::string> depCfgs = Util::getFiles(dir, filter);
   for(auto &cfg : depCfgs) {
-    const std::string &depName = cfg.substr(0, cfg.find("."));
-    readCfgFile(dir+"/"+cfg, depName);
+    DepConfig dep(cfg.substr(0, cfg.find(".")));
+    dep.read(dir+"/"+cfg);
+    deps_.emplace(dep.name, dep);
   }
 }
 
