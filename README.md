@@ -1,5 +1,5 @@
 # cast
-A simple and lightweight C/C++ build system with minimal user configuration.
+A simple and lightweight C++ build system with minimal user configuration.
 
 ## Features
 * Minimal user configuration
