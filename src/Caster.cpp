@@ -195,6 +195,11 @@ namespace Cast {
       if(!loadToolchainCfg(toolchain_)) {
         return 1;
       }
+    } else {
+      // use native compiler
+      toolchain_.gxx = "g++";
+      toolchain_.ar = "ar";
+      toolchain_.strip = "strip";
     }
 
     depMgr_.clear();
