@@ -69,8 +69,7 @@ namespace Cast {
       }
     } else {
       std::vector<std::string> lExts = {".so", ".a"};
-      std::vector<std::string> libs = Util::getFiles(cwd+"/"+dest, 
-                                                     lExts, includePath);
+      auto libs = Util::getFiles(cwd+"/"+dest, lExts, includePath);
       if(!Util::symlink(libs, topLib())) {
         ret = false;
       }
@@ -164,6 +163,24 @@ namespace Cast {
     }
   }
 
+  static bool loadToolchainCfg(CompilerConfig &toolchain) {
+    const std::string &toolchainCfgDir = "/usr/local/share/cast/crosstools";
+    std::vector<std::string> filter = {".cfg"};
+    auto cfgs = Util::getFiles(toolchainCfgDir, filter);
+    for(auto &cfg : cfgs) {
+      if(toolchain.name+".cfg" == cfg) {
+        toolchain.read(toolchainCfgDir+"/"+cfg);
+        break;
+      }
+    }
+    if(toolchain.gxx.empty() || 
+       toolchain.ar.empty()  || 
+       toolchain.strip.empty()) {
+      return false;
+    }
+    return true;
+  }
+
   Caster::Caster(const std::string &topDirPath) { 
     top_ = topDirPath;
   }
@@ -174,8 +191,10 @@ namespace Cast {
   int Caster::build(const std::string &toolchain) {
 
     if(!toolchain.empty() && toolchain != "native") {
-      // TODO look for toolchain config, load it up  
       toolchain_.name = toolchain;
+      if(!loadToolchainCfg(toolchain_)) {
+        return 1;
+      }
     }
 
     depMgr_.clear();

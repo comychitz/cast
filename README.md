@@ -60,7 +60,7 @@ subdir:myLib
 subdir:myExe
 ```
 
-### Config Items
+### config items
 
 | config item | possible values | notes |
 |---|---|---|
@@ -70,6 +70,19 @@ subdir:myExe
 | cflag | *string* | append to the list of cflags |
 | ldflag | *string* | append to the list of ldflags |
 
+### integrating cross compilers
+To have cast use a cross compiler installed on your machine, add a cross tool
+config file into `/usr/local/share/cast/crosstools`, with the cross tool's name
+plus `.cfg` as the file's extension. The following items shall be defined in
+the cross tool config. 
+
+| config item | description |
+|---|---|
+| ar | archive tool |
+| gxx | compiler |
+| strip | strip tool |
+**Full path should be specified for cross compiler tools**
+**Format of config file is the same as cast.cfg files**
 
 ## build cast
 ### Requires
