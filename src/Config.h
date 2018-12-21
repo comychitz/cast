@@ -57,5 +57,16 @@ namespace Cast {
       std::set<std::string> headers, libs, deps;
   };
 
+  class CompilerConfig : public ConfigInterface {
+    public:
+      CompilerConfig();
+
+      virtual ~CompilerConfig();
+
+      void processKeyValue(const std::string &key, const std::string &value);
+
+      std::string name, gxx, ar, strip;
+  };
+
 }
 #endif

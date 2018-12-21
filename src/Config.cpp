@@ -106,4 +106,20 @@ namespace Cast {
     }
   }
 
+  CompilerConfig::CompilerConfig() {
+  }
+
+  CompilerConfig::~CompilerConfig() { 
+  }
+
+  void CompilerConfig::processKeyValue(const std::string &key,
+                                       const std::string &value) {
+    if(key == "gxx") {
+      gxx = value;
+    } else if(key == "ar") {
+      ar = value;
+    } else if(key == "strip") {
+      strip = value;
+    }
+  }
 }

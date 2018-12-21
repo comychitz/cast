@@ -78,16 +78,15 @@ namespace Cast {
     return ret; 
   }
  
-  static bool buildCwd(DependencyManager &depMgr,
-                       const Config &cfg, 
-                       const std::string &dir,
-                       const std::string &dest) {
+  bool Caster::buildCwd_(const Config &cfg, 
+                         const std::string &dir,
+                         const std::string &dest) {
     std::vector<std::string> exts = {".cpp", ".c", ".cc"};
     std::vector<std::string> sources = Util::getFiles(".", exts);
     if(sources.empty()) {
       return true;
     }
-    Compiler compiler(topInclude(), topLib(), depMgr);
+    Compiler compiler(topInclude(), topLib(), depMgr_);
     if(!compiler.compile(cfg, dest, sources)) {
       return false;
     }
@@ -96,26 +95,25 @@ namespace Cast {
                             dest + cfg.getTargetName();
       std::vector<std::string> exts = {".h", ".hpp"};
       std::vector<std::string> headers = Util::getFiles(".", exts);
-      depMgr.addLib(libPath, headers);
+      depMgr_.addLib(libPath, headers);
     }
     return dir == "test" ? true : linkFiles(cfg, dir, dest);
   }
 
-  static bool check(DependencyManager &depMgr,
-                    const std::string &name,
-                    const std::string &dir) {
+  bool Caster::check_(const std::string &name,
+                      const std::string &dir) {
     bool ret = false;
     DirectoryScope dirScope(dir);
     const std::string &testName = name+"Test", &dest = "../.build/";
     Config testCfg(testName);
     testCfg.cflags("-std=c++14");
-    if(buildCwd(depMgr, testCfg, dir, dest)) {
+    if(buildCwd_(testCfg, dir, dest)) {
       ret = Util::run(dest+testName);
     }
     return ret;
   } 
 
-  static int build(DependencyManager &depMgr, const std::string &dir) {
+  int Caster::build_(const std::string &dir) {
     std::cout << "cast: Entering directory [" << getcwd(NULL, 0) << "/" << dir
               << "]" << std::endl;
     DirectoryScope dirScope(dir);
@@ -125,16 +123,16 @@ namespace Cast {
       cfg.read("cast.cfg");
     }
     for(auto &dir : cfg.subdirs()) {
-      if(build(depMgr, dir) != 0) {
+      if(build_(dir) != 0) {
         ret = 1;
       }
     }
     const std::string &dest = ".build/";
-    if (!buildCwd(depMgr, cfg, dir, dest)) {
+    if (!buildCwd_(cfg, dir, dest)) {
       ret = 1;
     }
     if (runTests_ && Util::exists("test")) {
-      if(!::Cast::check(depMgr, cfg.name(), "test")) {
+      if(!check_(cfg.name(), "test")) {
         ret = 1;
       }
     }
@@ -173,13 +171,19 @@ namespace Cast {
   Caster::~Caster() {
   }
 
-  int Caster::build() {
+  int Caster::build(const std::string &toolchain) {
+
+    if(!toolchain.empty() && toolchain != "native") {
+      // TODO look for toolchain config, load it up  
+      toolchain_.name = toolchain;
+    }
+
     depMgr_.clear();
     DirectoryScope dirScope(top_); 
     setupTopBuild();
     downloadDependencies();
     depMgr_.readCfgDir(depCfgDir());
-    return ::Cast::build(depMgr_, "src");
+    return build_("src");
   } 
 
   int Caster::clean() {
@@ -190,7 +194,7 @@ namespace Cast {
 
   int Caster::check() {
     runTests_ = true;
-    return build();
+    return build("");
   }
 
 }

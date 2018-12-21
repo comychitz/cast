@@ -12,13 +12,23 @@ namespace Cast {
 
       ~Caster();
 
-      int build();
+      int build(const std::string &toolchain);
 
       int clean();
 
       int check();
 
     private:
+      int build_(const std::string &dir);
+
+      bool buildCwd_(const Config &cfg,
+                     const std::string &dir,
+                     const std::string &dest);
+
+      bool check_(const std::string &name,
+                  const std::string &dir);
+
+      CompilerConfig toolchain_;
       DependencyManager depMgr_;
   };
 }
