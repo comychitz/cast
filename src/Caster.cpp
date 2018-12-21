@@ -85,7 +85,7 @@ namespace Cast {
     if(sources.empty()) {
       return true;
     }
-    Compiler compiler(topInclude(), topLib(), depMgr_);
+    Compiler compiler(toolchain_, topInclude(), topLib(), depMgr_);
     if(!compiler.compile(cfg, dest, sources)) {
       return false;
     }

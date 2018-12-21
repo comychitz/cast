@@ -9,7 +9,8 @@ namespace Cast {
 
 class Compiler {
   public:
-    Compiler(const std::string &topInclude, 
+    Compiler(const CompilerConfig &toolchain,
+             const std::string &topInclude, 
              const std::string &topLib,
              const DependencyManager &depMgr);
 
@@ -24,8 +25,12 @@ class Compiler {
                          const Config &cfg, 
                          const std::string &dest);
 
+    bool createStaticArchive_(const std::string &dest, 
+                              const Config &cfg);
+
     std::string topInclude_, topLib_;
     const DependencyManager &depMgr_;
+    const CompilerConfig &toolchain_;
 };
 
 }

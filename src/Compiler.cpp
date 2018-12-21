@@ -35,16 +35,12 @@ static bool targetUpToDate(const std::string &dest, const Config &cfg,
   return sourceModTime < targetModTime;
 }
 
-static bool createStaticArchive(const std::string &dest, const Config &cfg) {
-  std::stringstream cmd;
-  cmd << "ar -q " << dest << cfg.getTargetName() << " *.o; rm -f *.o";
-  return Util::run(cmd.str());
-}
-
-Compiler::Compiler(const std::string &topInclude,
+Compiler::Compiler(const CompilerConfig &toolchain,
+                   const std::string &topInclude,
                    const std::string &topLib,
                    const DependencyManager &depMgr)
-  : topInclude_(topInclude), topLib_(topLib), depMgr_(depMgr) {
+  : topInclude_(topInclude), topLib_(topLib), depMgr_(depMgr), 
+  toolchain_(toolchain) {
 }
 
 Compiler::~Compiler() {
@@ -61,7 +57,7 @@ bool Compiler::compile(const Config &cfg, const std::string &dest,
     return false;
   }
   if(cfg.target() == "a") {
-    return createStaticArchive(dest, cfg);
+    return createStaticArchive_(dest, cfg);
   }
   return true;
 }
@@ -70,7 +66,7 @@ bool Compiler::compileSources_(const std::vector<std::string> &sources,
                                const Config &cfg, 
                                const std::string &dest) {
   std::stringstream cmd;
-  cmd << "g++ " << "-I. -I" << topInclude_ << " " << cfg.cflags()
+  cmd << toolchain_.gxx << " -I. -I" << topInclude_ << " " << cfg.cflags()
       << " -L" << topLib_ << " " << cfg.ldflags(); 
   std::set<std::string> depLibs;
   for(auto &source : sources) {
@@ -88,6 +84,14 @@ bool Compiler::compileSources_(const std::vector<std::string> &sources,
   for(auto &lib : depLibs) {
     cmd << " " << lib;
   }
+  return Util::run(cmd.str());
+}
+
+bool Compiler::createStaticArchive_(const std::string &dest, 
+                                    const Config &cfg) {
+  std::stringstream cmd;
+  cmd << toolchain_.ar << " -q " << dest << cfg.getTargetName() 
+      << " *.o; rm -f *.o";
   return Util::run(cmd.str());
 }
 
