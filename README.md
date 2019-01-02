@@ -74,7 +74,7 @@ subdir:myExe
 To have cast use a cross compiler installed on your machine, add a cross tool
 config file into `/usr/local/share/cast/crosstools`, with the cross tool's name
 plus `.cfg` as the file's extension. The following items shall be defined in
-the cross tool config. 
+the cross tool config (following the same format for *cast.cfg* files).
 
 | config item | description |
 |---|---|
@@ -82,8 +82,6 @@ the cross tool config.
 | gxx | compiler |
 | strip | strip tool |
 
-**Full path should be specified for cross compiler tools**
-**Format of config file is the same as cast.cfg files**
 
 ## build cast
 ### Requires
