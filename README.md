@@ -81,6 +81,7 @@ the cross tool config.
 | ar | archive tool |
 | gxx | compiler |
 | strip | strip tool |
+
 **Full path should be specified for cross compiler tools**
 **Format of config file is the same as cast.cfg files**
 
