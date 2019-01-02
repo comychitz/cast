@@ -6,9 +6,9 @@ A simple and lightweight C++ build system with minimal user configuration.
 * Built-in unit testing support
 * Incremental Builds
 * Integrates with [Conan](https://github.com/conan-io/conan) for handling external dependencies
+* Support for cross compilation
 
 ## Upcoming Features
-* Support for cross compilation
 * Relative subdirectory re-building
 
 ## usage
