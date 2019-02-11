@@ -38,7 +38,8 @@ Include a `conanfile.txt` file at the top level of your directory and cast will
 handle installing and linking against the dependencies for you. *Note: this
 requires the CastGenerator package to be available.*
 
-*See example projects [here](https://github.com/comychitz/cast/tree/master/examples)*
+#### example projects
+See example projects [here](https://github.com/comychitz/cast/tree/master/examples)
 
 ### cast.cfg
 A simple library configuration can contain the following:
