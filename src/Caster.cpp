@@ -142,7 +142,8 @@ namespace Cast {
   static int clean(const std::string &dir) {
     int ret = 0;
     DirectoryScope dirScope(dir);
-    Util::rmrf(".build");
+    const std::string &cwd = getcwd(NULL, 0);
+    Util::rmrf(cwd+"/.build");
     Config cfg(dir);
     if(Util::exists("cast.cfg")) {
       cfg.read("cast.cfg");
