@@ -37,9 +37,8 @@ static bool targetUpToDate(const std::string &dest, const Config &cfg,
 
 Compiler::Compiler(const CompilerConfig &toolchain,
                    const std::string &topInclude,
-                   const std::string &topLib,
-                   const DependencyManager &depMgr)
-  : topInclude_(topInclude), topLib_(topLib), depMgr_(depMgr), 
+                   const std::string &topLib)
+  : topInclude_(topInclude), topLib_(topLib),
   toolchain_(toolchain) {
 }
 
@@ -47,13 +46,14 @@ Compiler::~Compiler() {
 }
 
 bool Compiler::compile(const Config &cfg, const std::string &dest,
-                       const std::vector<std::string> &sources) {
+                       const std::vector<std::string> &sources,
+                       const std::set<std::string> &depLibs) {
   if(targetUpToDate(dest, cfg, sources)) {
     std::cout << "cast: Target (" << cfg.getTargetName() << ") up to date" << std::endl;
     return true;
   }
   Util::mkdirp(dest);
-  if(!compileSources_(sources, cfg, dest)) {
+  if(!compileSources_(sources, depLibs, cfg, dest)) {
     return false;
   }
   if(cfg.target() == "a") {
@@ -63,15 +63,14 @@ bool Compiler::compile(const Config &cfg, const std::string &dest,
 }
 
 bool Compiler::compileSources_(const std::vector<std::string> &sources,
+                               const std::set<std::string> &depLibs,
                                const Config &cfg, 
                                const std::string &dest) {
   std::stringstream cmd;
   cmd << toolchain_.gxx << " -I. -I" << topInclude_ << " " << cfg.cflags()
       << " -L" << topLib_ << " " << cfg.ldflags(); 
-  std::set<std::string> depLibs;
   for(auto &source : sources) {
     cmd << " " << source;
-    depMgr_.determineDepLibs(source, depLibs);
   }
   if(cfg.target() == "a") {
     cmd << " -c";

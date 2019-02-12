@@ -85,10 +85,15 @@ namespace Cast {
     if(sources.empty()) {
       return true;
     }
-    Compiler compiler(toolchain_, topInclude(), topLib(), depMgr_);
-    if(!compiler.compile(cfg, dest, sources)) {
+    std::set<std::string> depLibs;
+    for(auto &source : sources) {
+      depMgr_.determineDepLibs(source, depLibs);
+    }
+    Compiler compiler(toolchain_, topInclude(), topLib());
+    if(!compiler.compile(cfg, dest, sources, depLibs)) {
       return false;
     }
+
     if(cfg.target() == "so" || cfg.target() == "a") {
       std::string libPath = std::string(getcwd(NULL, 0)) + "/" + 
                             dest + cfg.getTargetName();
@@ -96,6 +101,13 @@ namespace Cast {
       std::vector<std::string> headers = Util::getFiles(".", exts);
       depMgr_.addLib(libPath, headers);
     }
+
+    //
+    // TODO update the cache for this directory here...
+    // To do this, we need the resolvedDeps for this
+    // directory from the dependencyMgr
+    //
+
     return dir == "test" ? true : linkFiles(cfg, dir, dest);
   }
 
@@ -190,6 +202,19 @@ namespace Cast {
   }
 
   int Caster::build(const std::string &toolchain) {
+
+    if(false) { // TODO we are in subdir... 
+      //
+      // read cache, setting all needed variables:
+      //   - toolchain_ object values
+      //   - top_
+      //   - depMgr_.readCfgDir(depCfgDir());
+      //   - depMgr_ current dir dep tree
+      //
+      std::string cwd = getcwd(NULL, 0);
+      std::string cwdBasename = Util::basename(cwd); 
+      return build_(cwdBasename);
+    }
 
     if(!toolchain.empty() && toolchain != "native") {
       toolchain_.name = toolchain;
