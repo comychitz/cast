@@ -31,6 +31,10 @@ namespace Cast {
     return topBuild() + "/deps";
   }
 
+  static std::string cachePath() {
+    return "./.build/cast.cache";
+  }
+
   static void setupTopBuild() {
     Util::mkdirp(topBin());
     Util::mkdirp(topInclude());
@@ -76,6 +80,25 @@ namespace Cast {
     }
     return ret; 
   }
+
+  void Caster::readCache_(std::set<std::string> &depLibs) {
+    //
+    // TODO
+    //
+  }
+
+  void Caster::updateCache_(const std::set<std::string> &depLibs) {
+    //
+    // TODO update the cache for this directory here...
+    // To do this, we need the resolvedDeps for this
+    // directory from the dependencyMgr
+    //
+    // write into cache:
+    //  - top_
+    //  - depLibs for current dir
+    //  - toolchain name
+    //
+  }
  
   bool Caster::buildCwd_(const Config &cfg, 
                          const std::string &dir,
@@ -85,10 +108,18 @@ namespace Cast {
     if(sources.empty()) {
       return true;
     }
+
     std::set<std::string> depLibs;
+    if(Util::exists(cachePath())) { 
+      //
+      // TODO read depLibs for this dir from cache
+      //
+    } 
+
     for(auto &source : sources) {
       depMgr_.determineDepLibs(source, depLibs);
-    }
+    }  
+    
     Compiler compiler(toolchain_, topInclude(), topLib());
     if(!compiler.compile(cfg, dest, sources, depLibs)) {
       return false;
@@ -101,12 +132,7 @@ namespace Cast {
       std::vector<std::string> headers = Util::getFiles(".", exts);
       depMgr_.addLib(libPath, headers);
     }
-
-    //
-    // TODO update the cache for this directory here...
-    // To do this, we need the resolvedDeps for this
-    // directory from the dependencyMgr
-    //
+    updateCache_(depLibs);
 
     return dir == "test" ? true : linkFiles(cfg, dir, dest);
   }
@@ -202,15 +228,12 @@ namespace Cast {
   }
 
   int Caster::build(const std::string &toolchain) {
+    depMgr_.clear();
 
-    if(false) { // TODO we are in subdir... 
-      //
-      // read cache, setting all needed variables:
-      //   - toolchain_ object values
-      //   - top_
-      //   - depMgr_.readCfgDir(depCfgDir());
-      //   - depMgr_ current dir dep tree
-      //
+    if(Util::exists(cachePath())) {
+      std::set<std::string> depLibs;
+      readCache_(depLibs);
+      depMgr_.readCfgDir(depCfgDir());
       std::string cwd = getcwd(NULL, 0);
       std::string cwdBasename = Util::basename(cwd); 
       return build_(cwdBasename);
@@ -228,7 +251,6 @@ namespace Cast {
       toolchain_.strip = "strip";
     }
 
-    depMgr_.clear();
     DirectoryScope dirScope(top_); 
     setupTopBuild();
     downloadDependencies();
