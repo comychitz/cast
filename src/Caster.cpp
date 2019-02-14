@@ -269,4 +269,30 @@ namespace Cast {
     return build("");
   }
 
+  int Caster::parseCmdLineArgs(int argc, const char *argv[]) {
+
+    std::string toolchain;
+    bool cleanFlag = false, checkFlag = false;
+    for(int i = 1; i < argc; i++) {
+      std::string arg(argv[i]);
+      if(arg == "check") {
+        checkFlag = true;
+      } else if(arg == "clean") {
+        cleanFlag = true;
+      } else {
+        toolchain = arg;
+      }
+    }
+
+    int ret = 1;
+    if(cleanFlag) {
+      ret = clean();
+    } else if(checkFlag) {
+      ret = check();
+    } else {
+      ret = build(toolchain);
+    }
+    return ret;
+  }
+
 }

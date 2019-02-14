@@ -12,6 +12,8 @@ namespace Cast {
 
       ~Caster();
 
+      int parseCmdLineArgs(int argc, const char *argv[]);
+
       int build(const std::string &toolchain);
 
       int clean();
