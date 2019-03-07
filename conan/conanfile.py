@@ -46,7 +46,8 @@ class CastGenerator(Generator):
             for libDir in cpp_info.libdirs:
                 for root, dirs, files in walk(cpp_info.rootpath+"/"+libDir):
                     for f in files:
-                        depContents += ("lib:"+root+"/"+f)+"\n"
+                        if f.endswith(".a") or f.endswith(".so"):
+                            depContents += ("lib:"+root+"/"+f)+"\n"
 
             for public_dep in cpp_info.public_deps:
                 depContents += "dep:"+public_dep+"\n"
