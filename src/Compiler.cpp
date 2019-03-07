@@ -66,31 +66,56 @@ bool Compiler::compileSources_(const std::vector<std::string> &sources,
                                const std::set<std::string> &depLibs,
                                const Config &cfg, 
                                const std::string &dest) {
-  std::stringstream cmd;
-  cmd << toolchain_.gxx << " -I. -I" << topInclude_ << " " << cfg.cflags()
-      << " -L" << topLib_ << " " << cfg.ldflags(); 
-  for(auto &source : sources) {
-    cmd << " " << source;
-  }
-  if(cfg.target() == "a") {
-    cmd << " -c";
-  } else {
+
+  if(cfg.target() == "exe" || cfg.target() == "so") {
+    std::stringstream cmd;
+    cmd << toolchain_.gxx << " -I. -I" << topInclude_ << " " << cfg.cflags()
+        << " -L" << topLib_ << " " << cfg.ldflags(); 
+    for(auto &source : sources) {
+      cmd << " " << source;
+    }
+    for(auto &lib : depLibs) {
+      cmd << " " << lib;
+    }
     if(cfg.target() == "so") {
       cmd << " -shared";
     }        
     cmd << " -o " << dest << cfg.getTargetName();
+    return Util::run(cmd.str());
   } 
-  for(auto &lib : depLibs) {
-    cmd << " " << lib;
+
+  // if static library...
+  for(auto &source : sources) {
+    std::stringstream cmd;
+
+    // compile the source first...
+    cmd << toolchain_.gxx << " -I. -I" << topInclude_ << " " << cfg.cflags() << source << " -c";
+    if(!Util::run(cmd.str())) {
+      return false;
+    }
+
+    // TODO replace extension with .o, 
+    std::string output(source);
+
+    // then link it
+    cmd.str("");
+    cmd << toolchain_.gxx << " " << output << " -o " << output << " -L" 
+        << topLib_ << " " << cfg.ldflags(); 
+    for(auto &lib : depLibs) {
+      cmd << " " << lib;
+    }
+    if(!Util::run(cmd.str())) {
+      return false;
+    }
   }
-  return Util::run(cmd.str());
+  return true;
 }
 
 bool Compiler::createStaticArchive_(const std::string &dest, 
                                     const Config &cfg) {
   std::stringstream cmd;
   cmd << toolchain_.ar << " -q " << dest << cfg.getTargetName() 
-      << " *.o; rm -f *.o";
+      << " *.o && rm -f *.o";
   return Util::run(cmd.str());
 }
 
