@@ -84,27 +84,10 @@ bool Compiler::compileSources_(const std::vector<std::string> &sources,
     return Util::run(cmd.str());
   } 
 
-  // if static library...
+  // if static library we only need to compile, no linking
   for(auto &source : sources) {
     std::stringstream cmd;
-
-    // compile the source first...
     cmd << toolchain_.gxx << " -I. -I" << topInclude_ << " " << cfg.cflags() << source << " -c";
-    if(!Util::run(cmd.str())) {
-      return false;
-    }
-
-    std::string output(source);
-    size_t pos = output.find(".c");
-    output.replace(pos, output.size()-pos, ".o");
-
-    // then link it
-    cmd.str("");
-    cmd << toolchain_.gxx << " " << output << " -o " << output << " -L" 
-        << topLib_ << " " << cfg.ldflags(); 
-    for(auto &lib : depLibs) {
-      cmd << " " << lib;
-    }
     if(!Util::run(cmd.str())) {
       return false;
     }

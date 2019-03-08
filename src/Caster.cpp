@@ -109,7 +109,7 @@ namespace Cast {
       return true;
     }
 
-    std::set<std::string> depLibs;
+    std::set<std::string> depLibs, extDeps;
     if(Util::exists(cachePath())) { 
       //
       // TODO read depLibs for this dir from cache
@@ -117,7 +117,7 @@ namespace Cast {
     } 
 
     for(auto &source : sources) {
-      depMgr_.determineDepLibs(source, depLibs);
+      depMgr_.determineDepLibs(source, depLibs, extDeps);
     }  
     
     Compiler compiler(toolchain_, topInclude(), topLib());
@@ -130,7 +130,7 @@ namespace Cast {
                             dest + cfg.getTargetName();
       std::vector<std::string> exts = {".h", ".hpp"};
       std::vector<std::string> headers = Util::getFiles(".", exts);
-      depMgr_.addLib(libPath, headers);
+      depMgr_.addLib(libPath, headers, extDeps);
     }
     updateCache_(depLibs);
 

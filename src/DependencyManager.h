@@ -14,10 +14,12 @@ class DependencyManager {
     void clear();
 
     void addLib(const std::string &libName,
-                const std::vector<std::string> &headers);
+                const std::vector<std::string> &headers,
+                const std::set<std::string> &deps);
 
     void determineDepLibs(const std::string &sourceFile,
-                          std::set<std::string> &libs) const;
+                          std::set<std::string> &libs,
+                          std::set<std::string> &deps) const;
 
     void readCfgDir(const std::string &dir);
 
