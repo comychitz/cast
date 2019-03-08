@@ -67,6 +67,10 @@ namespace Cast {
     cfg_["cflags"] = val;
   }
 
+  void Config::ldflags(const std::string &val) {
+    cfg_["ldflags"] = val;
+  }
+
   const std::string &Config::cflags() const {
     return cfg_.at("cflags");
   }

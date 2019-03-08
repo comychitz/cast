@@ -27,7 +27,8 @@ namespace Cast {
                      const std::string &dir,
                      const std::string &dest);
 
-      bool check_(const std::string &name,
+      bool check_(const Config &cfg,
+                  const std::string &name,
                   const std::string &dir);
 
       void updateCache_(const std::set<std::string> &depLibs);

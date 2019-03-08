@@ -137,13 +137,18 @@ namespace Cast {
     return dir == "test" ? true : linkFiles(cfg, dir, dest);
   }
 
-  bool Caster::check_(const std::string &name,
+  bool Caster::check_(const Config &cfg,
+                      const std::string &name,
                       const std::string &dir) {
     bool ret = false;
     DirectoryScope dirScope(dir);
     const std::string &testName = name+"Test", &dest = "../.build/";
     Config testCfg(testName);
     testCfg.cflags("-std=c++14");
+    if(!cfg.cflags().empty()) {
+      testCfg.cflags(testCfg.cflags() + " " + cfg.cflags());
+    }
+    testCfg.ldflags(cfg.ldflags());
     if(buildCwd_(testCfg, dir, dest)) {
       ret = Util::run(dest+testName);
     }
@@ -169,7 +174,7 @@ namespace Cast {
       ret = 1;
     }
     if (runTests_ && Util::exists("test")) {
-      if(!check_(cfg.name(), "test")) {
+      if(!check_(cfg, cfg.name(), "test")) {
         ret = 1;
       }
     }
