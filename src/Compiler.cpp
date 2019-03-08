@@ -94,8 +94,9 @@ bool Compiler::compileSources_(const std::vector<std::string> &sources,
       return false;
     }
 
-    // TODO replace extension with .o, 
     std::string output(source);
+    size_t pos = output.find(".c");
+    output.replace(pos, output.size()-pos, ".o");
 
     // then link it
     cmd.str("");
