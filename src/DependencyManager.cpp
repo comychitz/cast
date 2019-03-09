@@ -90,6 +90,8 @@ void DependencyManager::determineDepLibs(const std::string &sourceFile,
           if(depLibs != deps_.end()) {
             libs.insert(depLibs->second.libs.begin(),
                         depLibs->second.libs.end());
+            depIncDirs.insert(depLibs->second.includeDirs.begin(),
+                              depLibs->second.includeDirs.end());
           }
         }
         break;
