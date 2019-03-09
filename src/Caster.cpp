@@ -203,7 +203,7 @@ namespace Cast {
     const std::string &cwd = getcwd(NULL, 0);
     if(Util::exists("./conanfile.txt")) {
       DirectoryScope dirScope(depCfgDir());
-      Util::run("conan install " + cwd + "/conanfile.txt"); 
+      Util::run("conan install --build=missing " + cwd + "/conanfile.txt"); 
     }
   }
 
