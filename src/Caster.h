@@ -8,7 +8,7 @@ namespace Cast {
 
   class Caster {
     public:
-      explicit Caster(const std::string &topDirPath); 
+      Caster(const std::string &topDirPath); 
 
       ~Caster();
 

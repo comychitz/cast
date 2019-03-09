@@ -109,7 +109,7 @@ namespace Cast {
       return true;
     }
 
-    std::set<std::string> depLibs, extDeps;
+    std::set<std::string> depLibs, extDeps, depIncludeDirs;
     if(Util::exists(cachePath())) { 
       //
       // TODO read depLibs for this dir from cache
@@ -117,11 +117,11 @@ namespace Cast {
     } 
 
     for(auto &source : sources) {
-      depMgr_.determineDepLibs(source, depLibs, extDeps);
+      depMgr_.determineDepLibs(source, depLibs, extDeps, depIncludeDirs);
     }  
     
     Compiler compiler(toolchain_, topInclude(), topLib());
-    if(!compiler.compile(cfg, dest, sources, depLibs)) {
+    if(!compiler.compile(cfg, dest, sources, depLibs, depIncludeDirs)) {
       return false;
     }
 
@@ -225,7 +225,7 @@ namespace Cast {
     return true;
   }
 
-  Caster::Caster(const std::string &topDirPath) { 
+  Caster::Caster(const std::string &topDirPath) {
     top_ = topDirPath;
   }
 
