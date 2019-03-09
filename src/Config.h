@@ -56,7 +56,7 @@ namespace Cast {
       void processKeyValue(const std::string &key, const std::string &value);
 
       std::string name;
-      std::set<std::string> headers, libs, deps;
+      std::set<std::string> headers, libs, deps, includeDirs;
   };
 
   class CompilerConfig : public ConfigInterface {

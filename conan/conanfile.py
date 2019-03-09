@@ -37,6 +37,7 @@ class CastGenerator(Generator):
             depContents = ""
             for includeDir in cpp_info.includedirs:
                 includePath = cpp_info.rootpath+"/"+includeDir
+                depContents += ("include:"+includePath+"\n")
                 for root, dirs, files in walk(includePath):
                     for f in files:
                         relativePath = root+"/"+f

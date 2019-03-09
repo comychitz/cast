@@ -18,11 +18,13 @@ class Compiler {
     bool compile(const Config &cfg, 
                  const std::string &dest,
                  const std::vector<std::string> &sources,
-                 const std::set<std::string> &depLibs);
+                 const std::set<std::string> &depLibs,
+                 const std::set<std::string> &depIncDirs);
 
   private:
     bool compileSources_(const std::vector<std::string> &sources,
                          const std::set<std::string> &depLibs,
+                         const std::set<std::string> &depIncDirs,
                          const Config &cfg, 
                          const std::string &dest);
 

@@ -47,13 +47,14 @@ Compiler::~Compiler() {
 
 bool Compiler::compile(const Config &cfg, const std::string &dest,
                        const std::vector<std::string> &sources,
-                       const std::set<std::string> &depLibs) {
+                       const std::set<std::string> &depLibs,
+                       const std::set<std::string> &depIncDirs) {
   if(targetUpToDate(dest, cfg, sources)) {
     std::cout << "cast: Target (" << cfg.getTargetName() << ") up to date" << std::endl;
     return true;
   }
   Util::mkdirp(dest);
-  if(!compileSources_(sources, depLibs, cfg, dest)) {
+  if(!compileSources_(sources, depLibs, depIncDirs, cfg, dest)) {
     return false;
   }
   if(cfg.target() == "a") {
@@ -64,13 +65,18 @@ bool Compiler::compile(const Config &cfg, const std::string &dest,
 
 bool Compiler::compileSources_(const std::vector<std::string> &sources,
                                const std::set<std::string> &depLibs,
+                               const std::set<std::string> &depIncDirs,
                                const Config &cfg, 
-                               const std::string &dest) {
+                               const std::string &dest) { 
 
   if(cfg.target() == "exe" || cfg.target() == "so") {
     std::stringstream cmd;
-    cmd << toolchain_.gxx << " -I. -I" << topInclude_ << " " << cfg.cflags()
-        << " -L" << topLib_ << " " << cfg.ldflags(); 
+    cmd << toolchain_.gxx << " -I. -I" << topInclude_ << " ";
+    for(auto &depIncDir : depIncDirs) {
+      cmd << "-I" << depIncDir << " ";
+    }
+    
+    cmd << cfg.cflags() << " -L" << topLib_ << " " << cfg.ldflags(); 
     for(auto &source : sources) {
       cmd << " " << source;
     }
@@ -87,7 +93,11 @@ bool Compiler::compileSources_(const std::vector<std::string> &sources,
   // if static library we only need to compile, no linking
   for(auto &source : sources) {
     std::stringstream cmd;
-    cmd << toolchain_.gxx << " -I. -I" << topInclude_ << " " << cfg.cflags() << source << " -c";
+    cmd << toolchain_.gxx << " -I. -I" << topInclude_ << " ";
+    for(auto &depIncDir : depIncDirs) {
+      cmd << "-I" << depIncDir << " ";
+    }
+    cmd << cfg.cflags() << " " << source << " -c";
     if(!Util::run(cmd.str())) {
       return false;
     }
