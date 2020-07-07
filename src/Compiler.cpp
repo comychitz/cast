@@ -11,7 +11,11 @@ static time_t getFileModTime(const std::string &path) {
   if(stat(path.c_str(), &statbuf) != 0) {
     return 0;
   }
+#ifdef RPI
+  return statbuf.st_mtim.tv_sec;
+#else
   return statbuf.st_mtimespec.tv_sec;
+#endif
 }
 
 static time_t getNewestSourceModTime(const std::vector<std::string> &sources) {

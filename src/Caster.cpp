@@ -240,7 +240,7 @@ namespace Cast {
       readCache_(depLibs);
       depMgr_.readCfgDir(depCfgDir());
       std::string cwd = getcwd(NULL, 0);
-      std::string cwdBasename = Util::basename(cwd); 
+      std::string cwdBasename = Util::baseName(cwd); 
       return build_(cwdBasename);
     }
 

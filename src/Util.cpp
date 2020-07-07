@@ -13,7 +13,7 @@ namespace Cast {
 
     bool chdir(const std::string &dir) {
       if(::chdir(dir.c_str()) < 0) {
-        std::cout << "chdir() error: " << dir << ": " << strerror(errno) << " (" 
+        std::cout << "chdir() error: " << dir << ": " << "(error no: " 
                   << errno << ")" << std::endl;
         return false;
       }
@@ -33,19 +33,19 @@ namespace Cast {
       return (system(cmd.c_str()) == 0);
     }
 
-    std::string basename(const std::string &path) {
-      return ::basename((char*)path.c_str());
+    std::string baseName(const std::string &path) {
+      return basename((char*)path.c_str());
     }
 
     bool symlink(const std::vector<std::string> &files, 
                  const std::string &dest) {
       for(auto &file : files) {
-        std::string target = dest + "/" + basename(file);
+        std::string target = dest + "/" + baseName(file);
         (void)unlink(target.c_str());
         std::cout << "ln -s " << file << " " << target << std::endl;
         if(::symlink(file.c_str(), target.c_str()) < 0) {
           std::cout << "Link error: " << file << " -> " << target << ": " 
-                    << strerror(errno) << " (" << errno << ")" << std::endl;
+                    << "(error no: " << errno << ")" << std::endl;
           return false;
         }
       }

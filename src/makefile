@@ -1,8 +1,15 @@
+#
+# define RPI=1 to compile for Raspberry Pi B+ V1.2 (Arm)
+#
 src = $(wildcard *.cpp)
 obj = $(src:.cpp=.o)
 tests = $(wildcard test/*.cpp)
 
 CXXFLAGS=-std=c++14 -I.
+
+ifeq ($(RPI), 1)
+    CXXFLAGS += -DRPI
+endif
 
 cast: $(obj)
 	g++ $(CXXFLAGS) -o $@ $^ 

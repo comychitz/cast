@@ -24,7 +24,7 @@ void DependencyManager::addLib(const std::string &libName,
                                const std::vector<std::string> &headers,
                                const std::set<std::string> &deps) {
   for(auto &header : headers) {
-    DepConfig dep(Util::basename(libName));
+    DepConfig dep(Util::baseName(libName));
     dep.libs.insert(libName);
     dep.headers.insert(headers.begin(), headers.end());
     dep.deps.insert(deps.begin(), deps.end());

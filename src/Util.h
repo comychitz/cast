@@ -14,7 +14,7 @@ namespace Cast {
 
     bool run(const std::string &cmd);
 
-    std::string basename(const std::string &path);
+    std::string baseName(const std::string &path);
 
     bool symlink(const std::vector<std::string> &files, 
                  const std::string &dest);
