@@ -84,6 +84,9 @@ namespace Cast {
         }
         std::string file = entry->d_name;
         size_t pos = file.rfind(".");
+        if(pos == std::string::npos) {
+          continue;
+        }
         std::string ext = file.substr(pos);
         for(auto f : filter) {
           if(ext == f) {

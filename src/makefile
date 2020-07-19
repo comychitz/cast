@@ -11,6 +11,10 @@ ifeq ($(RPI), 1)
     CXXFLAGS += -DRPI
 endif
 
+ifeq ($(DEBUG), 1)
+    CXXFLAGS += -g
+endif
+
 cast: $(obj)
 	g++ $(CXXFLAGS) -o $@ $^ 
 
