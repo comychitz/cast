@@ -24,7 +24,8 @@ void DependencyManager::clear() {
 void DependencyManager::addLib(const std::string &libPath,
                                const std::vector<std::string> &headers,
                                const std::set<std::string> &deps) {
-  std::string libName = "cast_internal_dep_" + Util::baseName(libPath);
+  std::string libPathBasename = Util::baseName(libPath);
+  std::string libName = "internal_dep_" + libPathBasename.substr(0, libPathBasename.find("."));
   deps_.erase(libName);
   DepConfig dep(Util::baseName(libPath));
   dep.libs.insert(libPath);
