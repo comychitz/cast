@@ -83,6 +83,30 @@ the cross tool config (following the same format for *cast.cfg* files).
 | gxx | compiler |
 | strip | strip tool |
 
+### default system dependencies
+If there are specific libraries that are available on the system (ex. pthread)
+that you'd like to use in your project directly, you need to make Cast aware
+of them. This can be done by adding dependency config files to the default Cast
+dependency directory: `/usr/local/share/cast/deps/`. 
+
+For example, to make cast aware that a source file that includes `pthread.h`
+needs to link with `-lpthread`, add a file named `pthread.cfg` to the default
+Cast dependency directory with the following contents
+```
+header:pthread.h
+lib:-lpthread
+```
+*If the dependency depends on another dependency, add `dep:` entry for each
+dependency. For example, if there is a system library named `libC` that depends
+on `libA` and `libB` we would create 3 dependency config files (named
+`libA.cfg`, `libB.cfg` and `libC.cfg`), of which the `libC.cfg` file would 
+contain the following:
+```
+header:libC.h
+lib:-llibC
+dep:libA
+dep:libB
+```
 
 ## build cast
 ### Requires
