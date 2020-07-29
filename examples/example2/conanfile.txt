@@ -1,0 +1,7 @@
+[requires]
+CastGenerator/01.00.00@user/testing
+OpenSSL/1.0.2l@conan/stable
+
+[generators]
+CastGenerator
+
