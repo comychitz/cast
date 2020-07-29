@@ -55,6 +55,8 @@ namespace Cast {
 
       void processKeyValue(const std::string &key, const std::string &value);
 
+      void write(const std::string &fileName);
+
       std::string name;
       std::set<std::string> headers, libs, deps, includeDirs;
   };

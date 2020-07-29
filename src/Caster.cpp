@@ -81,23 +81,12 @@ namespace Cast {
     return ret; 
   }
 
-  void Caster::readCache_(std::set<std::string> &depLibs) {
-    //
-    // TODO
-    //
+  void Caster::readCache_() {
+    // TODO - get top_ and toolchain_ values from cache file
   }
 
-  void Caster::updateCache_(const std::set<std::string> &depLibs) {
-    //
-    // TODO update the cache for this directory here...
-    // To do this, we need the resolvedDeps for this
-    // directory from the dependencyMgr
-    //
-    // write into cache:
-    //  - top_
-    //  - depLibs for current dir
-    //  - toolchain name
-    //
+  void Caster::updateCache_() {
+    // TODO - write top_ and toolchain_ values to cache file
   }
  
   bool Caster::buildCwd_(const Config &cfg, 
@@ -110,12 +99,6 @@ namespace Cast {
     }
 
     std::set<std::string> depLibs, extDeps, depIncludeDirs;
-    if(Util::exists(cachePath())) { 
-      //
-      // TODO read depLibs for this dir from cache
-      //
-    } 
-
     for(auto &source : sources) {
       depMgr_.determineDepLibs(source, depLibs, extDeps, depIncludeDirs);
     }  
@@ -132,7 +115,7 @@ namespace Cast {
       std::vector<std::string> headers = Util::getFiles(".", exts);
       depMgr_.addLib(libPath, headers, extDeps);
     }
-    updateCache_(depLibs);
+    updateCache_();
 
     return dir == "test" ? true : linkFiles(cfg, dir, dest);
   }
@@ -236,12 +219,7 @@ namespace Cast {
     depMgr_.clear();
 
     if(Util::exists(cachePath())) {
-      std::set<std::string> depLibs;
-      readCache_(depLibs);
-      depMgr_.readCfgDir(depCfgDir());
-      std::string cwd = getcwd(NULL, 0);
-      std::string cwdBasename = Util::baseName(cwd); 
-      return build_(cwdBasename);
+      readCache_();
     }
 
     if(!toolchain.empty() && toolchain != "native") {
@@ -254,6 +232,13 @@ namespace Cast {
       toolchain_.gxx = "g++";
       toolchain_.ar = "ar";
       toolchain_.strip = "strip";
+    }
+
+    if(Util::exists(cachePath())) {
+      depMgr_.readCfgDir(depCfgDir());
+      std::string cwd = getcwd(NULL, 0);
+      std::string cwdBasename = Util::baseName(cwd); 
+      return build_(cwdBasename);
     }
 
     DirectoryScope dirScope(top_); 

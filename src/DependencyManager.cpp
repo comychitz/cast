@@ -9,6 +9,7 @@
 namespace Cast {
 
 DependencyManager::DependencyManager() {
+  // directory to put common system dependency config files (ex. pthread)
   const std::string defaultDepCfgDir = "/usr/local/share/cast/deps";
   readCfgDir(defaultDepCfgDir);
 }
@@ -20,16 +21,19 @@ void DependencyManager::clear() {
   deps_.clear();
 }
 
-void DependencyManager::addLib(const std::string &libName,
+void DependencyManager::addLib(const std::string &libPath,
                                const std::vector<std::string> &headers,
                                const std::set<std::string> &deps) {
-  for(auto &header : headers) {
-    DepConfig dep(Util::baseName(libName));
-    dep.libs.insert(libName);
-    dep.headers.insert(headers.begin(), headers.end());
-    dep.deps.insert(deps.begin(), deps.end());
-    deps_.emplace(libName, dep);
-  }
+  std::string libName = "cast_internal_dep_" + Util::baseName(libPath);
+  deps_.erase(libName);
+  DepConfig dep(Util::baseName(libPath));
+  dep.libs.insert(libPath);
+  dep.headers.insert(headers.begin(), headers.end());
+  dep.deps.insert(deps.begin(), deps.end());
+  deps_.emplace(libName, dep);
+
+  // TODO write this new dep to the <top>/build/dep/ dir
+  dep.write(libName + ".cfg");
 }
 
 static bool parseHeaderFileFromLine(const std::string &line,

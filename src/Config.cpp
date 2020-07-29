@@ -112,6 +112,12 @@ namespace Cast {
     }
   }
 
+  void DepConfig::write(const std::string &fileName) {
+
+    // TODO - dump config to file - if file exists, overwrite it
+
+  }
+
   CompilerConfig::CompilerConfig() {
   }
 

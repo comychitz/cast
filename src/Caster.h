@@ -31,9 +31,9 @@ namespace Cast {
                   const std::string &name,
                   const std::string &dir);
 
-      void updateCache_(const std::set<std::string> &depLibs);
+      void updateCache_();
 
-      void readCache_(std::set<std::string> &depLibs);
+      void readCache_();
 
       CompilerConfig toolchain_;
       DependencyManager depMgr_;
