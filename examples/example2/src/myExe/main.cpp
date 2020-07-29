@@ -1,4 +1,5 @@
-#include <Incrementer.h>
+#include "Incrementer.h"
+#include "IncrementerWrapper.h"
 #include <iostream>
 #include <pthread.h>
 
@@ -10,6 +11,10 @@ int main(int argc, const char *argv[])
 
   pthread_mutex_t lock;
   pthread_mutex_init(&lock, NULL);
+
+  IncrementerWrapper incWrapper;
+  incWrapper.increment();
+  std::cout << incWrapper.getCount() << std::endl;
 
   return 0;
 }

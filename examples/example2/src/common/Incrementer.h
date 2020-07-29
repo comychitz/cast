@@ -1,3 +1,6 @@
+#ifndef _INCREMENTER_H_
+#define _INCREMENTER_H_
+
 class Incrementer 
 {
   public:
@@ -12,3 +15,5 @@ class Incrementer
   private:
     int count_;
 };
+
+#endif
