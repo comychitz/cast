@@ -15,7 +15,8 @@ class DependencyManager {
 
     void addLib(const std::string &libName,
                 const std::vector<std::string> &headers,
-                const std::set<std::string> &deps);
+                const std::set<std::string> &deps,
+                const std::string &depCfgDir);
 
     void determineDepLibs(const std::string &sourceFile,
                           std::set<std::string> &libs,
@@ -23,6 +24,8 @@ class DependencyManager {
                           std::set<std::string> &depIncDirs) const;
 
     void readCfgDir(const std::string &dir);
+
+    void dump();
 
   private:
     void readCfgFile(const std::string &file,

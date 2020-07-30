@@ -23,18 +23,43 @@ void DependencyManager::clear() {
 
 void DependencyManager::addLib(const std::string &libPath,
                                const std::vector<std::string> &headers,
-                               const std::set<std::string> &deps) {
+                               const std::set<std::string> &deps,
+                               const std::string &depCfgDir) {
   std::string libPathBasename = Util::baseName(libPath);
   std::string libName = "internal_dep_" + libPathBasename.substr(0, libPathBasename.find("."));
   deps_.erase(libName);
-  DepConfig dep(Util::baseName(libPath));
+  DepConfig dep(libName);
   dep.libs.insert(libPath);
   dep.headers.insert(headers.begin(), headers.end());
   dep.deps.insert(deps.begin(), deps.end());
   deps_.emplace(libName, dep);
 
   // TODO write this new dep to the <top>/build/dep/ dir
-  dep.write(libName + ".cfg");
+  dep.write(depCfgDir+"/"+libName+".cfg");
+  
+  std::cout << "Dumping after adding: " << libName << std::endl;
+  dump();
+}
+
+static void printSet(std::set<std::string> &s) {
+  for(auto &str: s) {
+    std::cout << "\t" << str << std::endl;
+  }
+}
+
+void DependencyManager::dump() {
+  for(auto &dep : deps_) {
+    std::cout << dep.first << " (" << dep.second.name << ")" << std::endl;
+    std::cout << "headers:" << std::endl;
+    printSet(dep.second.headers);
+    std::cout << "libs:" << std::endl;
+    printSet(dep.second.libs);
+    std::cout << "deps:" << std::endl;
+    printSet(dep.second.deps);
+    std::cout << "includeDirs:" << std::endl;
+    printSet(dep.second.includeDirs);
+  }
+
 }
 
 static bool parseHeaderFileFromLine(const std::string &line,

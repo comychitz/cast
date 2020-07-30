@@ -113,7 +113,7 @@ namespace Cast {
                             dest + cfg.getTargetName();
       std::vector<std::string> exts = {".h", ".hpp"};
       std::vector<std::string> headers = Util::getFiles(".", exts);
-      depMgr_.addLib(libPath, headers, extDeps);
+      depMgr_.addLib(libPath, headers, extDeps, depCfgDir());
     }
     updateCache_();
 
