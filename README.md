@@ -1,3 +1,4 @@
+[![comychitz](https://circleci.com/gh/comychitz/cast.svg?style=svg)](https://app.circleci.com/pipelines/github/comychitz/cast)
 # cast
 A simple and lightweight C++ build system with minimal user configuration.
 
