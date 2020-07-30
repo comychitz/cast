@@ -14,7 +14,7 @@ namespace Cast {
 
       int parseCmdLineArgs(int argc, const char *argv[]);
 
-      int build(const std::string &toolchain);
+      int build();
 
       int clean();
 
@@ -30,10 +30,6 @@ namespace Cast {
       bool check_(const Config &cfg,
                   const std::string &name,
                   const std::string &dir);
-
-      void updateCache_();
-
-      void readCache_();
 
       CompilerConfig toolchain_;
       DependencyManager depMgr_;

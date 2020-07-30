@@ -25,8 +25,6 @@ class DependencyManager {
 
     void readCfgDir(const std::string &dir);
 
-    void dump();
-
   private:
     void readCfgFile(const std::string &file,
                      const std::string &depName);

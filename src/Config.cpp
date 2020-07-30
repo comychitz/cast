@@ -113,9 +113,20 @@ namespace Cast {
   }
 
   void DepConfig::write(const std::string &fileName) {
-
-    // TODO - dump config to file - if file exists, overwrite it
-
+    std::ofstream f(fileName);
+    for(auto &header : headers) {
+      f << "header:" << header << std::endl;
+    }
+    for(auto &lib : libs) {
+      f << "lib:" << lib << std::endl;
+    }
+    for(auto &dep : deps) {
+      f << "dep:" << dep << std::endl;
+    }
+    for(auto &includeDir : includeDirs) {
+      f << "include:" << includeDir << std::endl;
+    }
+    f.close();
   }
 
   CompilerConfig::CompilerConfig() {
@@ -134,4 +145,25 @@ namespace Cast {
       strip = value;
     }
   }
+
+  CacheConfig::CacheConfig() {
+  }
+
+  CacheConfig::~CacheConfig() {
+  }
+
+  void CacheConfig::processKeyValue(const std::string &key, const std::string &value) {
+    if(key == "top") {
+      top = value;
+    } else if(key == "toolchainName") {
+      toolchainName = value;
+    }
+  }
+
+  void CacheConfig::write(const std::string &fileName) {
+    std::ofstream f(fileName);
+    f << "top:" << top << std::endl;
+    f << "toolchainName:" << toolchainName << std::endl;
+  }
+
 }

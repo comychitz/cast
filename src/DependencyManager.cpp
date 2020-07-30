@@ -21,6 +21,16 @@ void DependencyManager::clear() {
   deps_.clear();
 }
 
+void DependencyManager::readCfgDir(const std::string &dir) {
+  std::vector<std::string> filter = {".cfg"};
+  std::vector<std::string> depCfgs = Util::getFiles(dir, filter);
+  for(auto &cfg : depCfgs) {
+    DepConfig dep(cfg.substr(0, cfg.find(".")));
+    dep.read(dir+"/"+cfg);
+    deps_.emplace(dep.name, dep);
+  }
+}
+
 void DependencyManager::addLib(const std::string &libPath,
                                const std::vector<std::string> &headers,
                                const std::set<std::string> &deps,
@@ -33,33 +43,7 @@ void DependencyManager::addLib(const std::string &libPath,
   dep.headers.insert(headers.begin(), headers.end());
   dep.deps.insert(deps.begin(), deps.end());
   deps_.emplace(libName, dep);
-
-  // TODO write this new dep to the <top>/build/dep/ dir
   dep.write(depCfgDir+"/"+libName+".cfg");
-  
-  std::cout << "Dumping after adding: " << libName << std::endl;
-  dump();
-}
-
-static void printSet(std::set<std::string> &s) {
-  for(auto &str: s) {
-    std::cout << "\t" << str << std::endl;
-  }
-}
-
-void DependencyManager::dump() {
-  for(auto &dep : deps_) {
-    std::cout << dep.first << " (" << dep.second.name << ")" << std::endl;
-    std::cout << "headers:" << std::endl;
-    printSet(dep.second.headers);
-    std::cout << "libs:" << std::endl;
-    printSet(dep.second.libs);
-    std::cout << "deps:" << std::endl;
-    printSet(dep.second.deps);
-    std::cout << "includeDirs:" << std::endl;
-    printSet(dep.second.includeDirs);
-  }
-
 }
 
 static bool parseHeaderFileFromLine(const std::string &line,
@@ -130,16 +114,6 @@ void DependencyManager::determineDepLibs(const std::string &sourceFile,
     if(Util::exists(header)) {
       determineDepLibs(header, libs, deps, depIncDirs); 
     } 
-  }
-}
-
-void DependencyManager::readCfgDir(const std::string &dir) {
-  std::vector<std::string> filter = {".cfg"};
-  std::vector<std::string> depCfgs = Util::getFiles(dir, filter);
-  for(auto &cfg : depCfgs) {
-    DepConfig dep(cfg.substr(0, cfg.find(".")));
-    dep.read(dir+"/"+cfg);
-    deps_.emplace(dep.name, dep);
   }
 }
 

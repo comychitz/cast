@@ -9,6 +9,7 @@
 namespace Cast {
 
   static std::string top_;
+  static std::string toolchainName_;
   static bool runTests_ = false;
 
   static std::string topBuild() {
@@ -81,12 +82,18 @@ namespace Cast {
     return ret; 
   }
 
-  void Caster::readCache_() {
-    // TODO - get top_ and toolchain_ values from cache file
+  static void readCache() {
+    CacheConfig cache;
+    cache.read(cachePath());
+    top_ = cache.top;
+    toolchainName_ = cache.toolchainName;
   }
 
-  void Caster::updateCache_() {
-    // TODO - write top_ and toolchain_ values to cache file
+  static void updateCache() {
+    CacheConfig cache;
+    cache.top = top_;
+    cache.toolchainName = toolchainName_;
+    cache.write(cachePath());
   }
  
   bool Caster::buildCwd_(const Config &cfg, 
@@ -115,7 +122,7 @@ namespace Cast {
       std::vector<std::string> headers = Util::getFiles(".", exts);
       depMgr_.addLib(libPath, headers, extDeps, depCfgDir());
     }
-    updateCache_();
+    updateCache();
 
     return dir == "test" ? true : linkFiles(cfg, dir, dest);
   }
@@ -215,15 +222,15 @@ namespace Cast {
   Caster::~Caster() {
   }
 
-  int Caster::build(const std::string &toolchain) {
+  int Caster::build() {
     depMgr_.clear();
 
     if(Util::exists(cachePath())) {
-      readCache_();
+      readCache();
     }
 
-    if(!toolchain.empty() && toolchain != "native") {
-      toolchain_.name = toolchain;
+    if(!toolchainName_.empty() && toolchainName_ != "native") {
+      toolchain_.name = toolchainName_;
       if(!loadToolchainCfg(toolchain_)) {
         return 1;
       }
@@ -236,8 +243,8 @@ namespace Cast {
 
     if(Util::exists(cachePath())) {
       depMgr_.readCfgDir(depCfgDir());
-      std::string cwd = getcwd(NULL, 0);
-      std::string cwdBasename = Util::baseName(cwd); 
+      std::string cwdBasename = Util::baseName(getcwd(NULL, 0));
+      DirectoryScope dirScope("..");
       return build_(cwdBasename);
     }
 
@@ -256,12 +263,11 @@ namespace Cast {
 
   int Caster::check() {
     runTests_ = true;
-    return build("");
+    return build();
   }
 
   int Caster::parseCmdLineArgs(int argc, const char *argv[]) {
 
-    std::string toolchain;
     bool cleanFlag = false, checkFlag = false;
     for(int i = 1; i < argc; i++) {
       std::string arg(argv[i]);
@@ -270,7 +276,7 @@ namespace Cast {
       } else if(arg == "clean") {
         cleanFlag = true;
       } else {
-        toolchain = arg;
+        toolchainName_ = arg;
       }
     }
 
@@ -280,7 +286,7 @@ namespace Cast {
     } else if(checkFlag) {
       ret = check();
     } else {
-      ret = build(toolchain);
+      ret = build();
     }
     return ret;
   }

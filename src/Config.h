@@ -72,5 +72,18 @@ namespace Cast {
       std::string name, gxx, ar, strip;
   };
 
+  class CacheConfig : public ConfigInterface {
+    public:
+      CacheConfig();
+      
+      virtual ~CacheConfig();
+
+      void processKeyValue(const std::string &key, const std::string &value);
+
+      void write(const std::string &fileName);
+
+      std::string top, toolchainName;
+  };
+
 }
 #endif
