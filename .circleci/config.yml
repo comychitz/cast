@@ -1,0 +1,17 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: alpine:3.7
+    steps:
+      - run:
+          name: build cast
+          command: |
+            apk add git make g++ py3-pip
+            pip3 install conan
+            git clone https://github.com/comychitz/cast
+            git clone https://github.com/catchorg/Catch2
+            mkdir -p /usr/local/include/catch2
+            cp Catch2/single_include/catch2/catch.hpp /usr/local/include/catch2
+            cd cast/src && make RPI=1 && make check RPI=1
+         
