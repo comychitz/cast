@@ -4,12 +4,9 @@ A simple and lightweight C++ build system with minimal user configuration.
 ## Features
 * Minimal user configuration
 * Built-in unit testing support
-* Incremental Builds
+* Support for incremental and partial project builds
 * Integrates with [Conan](https://github.com/conan-io/conan) for handling external dependencies
 * Support for cross compilation
-
-## Upcoming Features
-* Relative subdirectory re-building
 
 ## usage
 Just run cast from the top level of your project!
