@@ -58,7 +58,7 @@ namespace Cast {
       void write(const std::string &fileName);
 
       std::string name;
-      std::set<std::string> headers, libs, deps, includeDirs;
+      std::set<std::string> headers, libs, deps, includeDirs, frameworks;
   };
 
   class CompilerConfig : public ConfigInterface {

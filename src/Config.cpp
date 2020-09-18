@@ -109,6 +109,8 @@ namespace Cast {
       libs.insert(value);
     } else if(key == "include") {
       includeDirs.insert(value);
+    } else if(key == "framework") {
+      frameworks.insert(value);
     }
   }
 

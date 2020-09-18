@@ -95,6 +95,10 @@ void DependencyManager::determineDepLibs(const std::string &sourceFile,
     for(auto &dep : deps_) {
       if(dep.second.headers.find(header) != dep.second.headers.end()) {
         libs.insert(dep.second.libs.begin(), dep.second.libs.end());
+        // add frameworks for macOS linking purposes (treat it like a lib)
+        for(auto &framework : dep.second.frameworks) {
+          libs.insert("-framework " + framework);
+        }
         deps.insert(dep.second.name);
         depIncDirs.insert(dep.second.includeDirs.begin(), 
                           dep.second.includeDirs.end());
