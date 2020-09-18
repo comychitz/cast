@@ -50,6 +50,9 @@ class CastGenerator(Generator):
                         if f.endswith(".a") or f.endswith(".so"):
                             depContents += ("lib:"+root+"/"+f)+"\n"
 
+            for framework in cpp_info.frameworks:
+                depContents += ("framework:"+framework+"\n")
+
             for public_dep in cpp_info.public_deps:
                 depContents += "dep:"+public_dep+"\n"
 
